@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - University CAF System</title>
+    <style>
+        :root {
+            --color-primary: #4299e1;
+            --color-text: #2d3748;
+            --color-text-secondary: #718096;
+            --color-bg: #ffffff;
+            --color-bg-secondary: #f7fafc;
+            --color-border: #e2e8f0;
+            --color-success: #38a169;
+            --color-error: #e53e3e;
+            --color-warning: #ed8936;
+            --sidebar-width: 240px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text);
+        }
+
+        body {
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--color-bg-secondary);
+            border-right: 1px solid var(--color-border);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 24px 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 12px 0;
+        }
+
+        .sidebar-nav li {
+            margin: 0;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 12px 16px;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .sidebar-nav a.active {
+            background-color: #eff6ff;
+            color: var(--color-primary);
+            border-left-color: var(--color-primary);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: var(--sidebar-width);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-info {
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .admin-role {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .admin-status {
+            color: var(--color-text-secondary);
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background-color: var(--color-border);
+            border: none;
+            border-radius: 4px;
+            color: var(--color-text);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #cbd5e0;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* Cards and Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background-color: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat {
+            margin-bottom: 16px;
+        }
+
+        .stat:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Tables */
+        .table-container {
+            background-color: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        tbody tr:hover {
+            background-color: var(--color-bg-secondary);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-warning {
+            background-color: #feebc8;
+            color: #7c2d12;
+        }
+
+        .badge-error {
+            background-color: #fed7d7;
+            color: #742a2a;
+        }
+
+        .badge-info {
+            background-color: #bee3f8;
+            color: #2c5282;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 16px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #3182ce;
+        }
+
+        .btn-secondary {
+            background-color: var(--color-border);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--color-bg);
+            border-radius: 8px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-container {
+                margin-left: 200px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 160px;
+            }
+
+            .main-container {
+                margin-left: 160px;
+            }
+
+            .sidebar-nav a {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .page-title {
+                font-size: 20px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">CAF Admin</div>
+        </div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li><a href="#" onclick="navigateTo('dashboard')" class="nav-link active">Dashboard</a></li>
+                <li><a href="#" onclick="navigateTo('students')" class="nav-link">Students</a></li>
+                <li><a href="#" onclick="navigateTo('rfid-requests')" class="nav-link">RFID Requests</a></li>
+                <li><a href="#" onclick="navigateTo('cafs')" class="nav-link">CAFs</a></li>
+                <li><a href="#" onclick="navigateTo('terminals')" class="nav-link">Terminals</a></li>
+                <li><a href="#" onclick="navigateTo('meal-sessions')" class="nav-link">Meal Sessions</a></li>
+                <li><a href="#" onclick="navigateTo('meal-logs')" class="nav-link">Meal Logs</a></li>
+                <li><a href="#" onclick="navigateTo('settings')" class="nav-link">Settings</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="header-title">Administration</h1>
+            </div>
+            <div class="header-right">
+                <div class="admin-info">
+                    <div class="admin-role">System Admin</div>
+                    <div class="admin-status">Authenticated</div>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="page-title">Dashboard</div>
+                <div class="page-subtitle">Overview of cafeteria operations</div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">Total Students</div>
+                        <div class="stat-value" id="totalStudents">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Meals Today</div>
+                        <div class="stat-value" id="mealToday">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Active CAFs</div>
+                        <div class="stat-value" id="activeCafs">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Active Terminals</div>
+                        <div class="stat-value" id="activeTerminals">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Page -->
+            <div id="students" class="page">
+                <div class="page-title">Students</div>
+                <div class="page-subtitle">Manage student records</div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Matric Number</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTable">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">📚</div>
+                                        <div class="empty-state-title">No students yet</div>
+                                        <p>Students will appear here once they register</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- RFID Requests Page -->
+            <div id="rfid-requests" class="page">
+                <div class="page-title">RFID Requests</div>
+                <div class="page-subtitle">Manage student RFID card requests</div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Matric Number</th>
+                                <th>Student Name</th>
+                                <th>Status</th>
+                                <th>Date Requested</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rfidTable">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">🏷️</div>
+                                        <div class="empty-state-title">No RFID requests</div>
+                                        <p>RFID requests will appear here</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CAFs Page -->
+            <div id="cafs" class="page">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <div class="page-title">CAFs</div>
+                        <div class="page-subtitle">Manage cafeteria locations</div>
+                    </div>
+                    <button class="btn" onclick="openCAFModal()">Add New CAF</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CAF Name</th>
+                                <th>Building</th>
+                                <th>Capacity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cafsTable">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">🍽️</div>
+                                        <div class="empty-state-title">No CAFs configured</div>
+                                        <p>Add a new CAF to get started</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Terminals Page -->
+            <div id="terminals" class="page">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <div class="page-title">Terminals</div>
+                        <div class="page-subtitle">Manage scanning terminals</div>
+                    </div>
+                    <button class="btn" onclick="openTerminalModal()">Add New Terminal</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Terminal ID</th>
+                                <th>CAF</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="terminalsTable">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">💻</div>
+                                        <div class="empty-state-title">No terminals configured</div>
+                                        <p>Add a new terminal to get started</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Meal Sessions Page -->
+            <div id="meal-sessions" class="page">
+                <div class="page-title">Meal Sessions</div>
+                <div class="page-subtitle">Manage meal service periods</div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Session Name</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessionsTable">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">⏰</div>
+                                        <div class="empty-state-title">No meal sessions</div>
+                                        <p>Meal sessions will appear here</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Meal Logs Page -->
+            <div id="meal-logs" class="page">
+                <div class="page-title">Meal Logs</div>
+                <div class="page-subtitle">View all meal transactions</div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Matric Number</th>
+                                <th>Student Name</th>
+                                <th>CAF</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTable">
+                            <tr>
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">📋</div>
+                                        <div class="empty-state-title">No meal logs</div>
+                                        <p>Meal transactions will appear here</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <div class="page-title">Settings</div>
+                <div class="page-subtitle">System configuration</div>
+
+                <div class="card">
+                    <div class="card-title">System Information</div>
+                    <div style="font-size: 14px; color: var(--color-text-secondary);">
+                        <p style="margin-bottom: 12px;"><strong>System Name:</strong> University CAF Management System</p>
+                        <p style="margin-bottom: 12px;"><strong>Version:</strong> 1.0.0</p>
+                        <p><strong>Last Updated:</strong> 2025-01-01</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAF Modal -->
+    <div id="cafModal" class="modal">
+        <div class="modal-content" style="background-color: #a7aba9;">
+            <button class="modal-close" onclick="closeCAFModal()">×</button>
+            <div class="modal-title">Add New CAF</div>
+
+            <form id="cafForm" onsubmit="handleAddCAF(event)">
+                <div class="form-group">
+                    <label for="cafName">CAF Name</label>
+                    <input type="text" id="cafName" required>
+                </div>
+                <div class="form-group">
+                    <label for="cafBuilding">Building</label>
+                    <input type="text" id="cafBuilding" required>
+                </div>
+                <div class="form-group">
+                    <label for="cafCapacity">Capacity</label>
+                    <input type="number" id="cafCapacity" required>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn">Add CAF</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeCAFModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Terminal Modal -->
+    <div id="terminalModal" class="modal">
+        <div class="modal-content" style="background-color: #a7aba9;">
+            <button class="modal-close" onclick="closeTerminalModal()">×</button>
+            <div class="modal-title">Add New Terminal</div>
+
+            <form id="terminalForm" onsubmit="handleAddTerminal(event)">
+                <div class="form-group">
+                    <label for="terminalId">Terminal ID</label>
+                    <input type="text" id="terminalId" required>
+                </div>
+                <div class="form-group">
+                    <label for="terminalCAF">CAF</label>
+                    <select id="terminalCAF" required>
+                        <option value="">-- Select CAF --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="terminalLocation">Location</label>
+                    <input type="text" id="terminalLocation" required>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn">Add Terminal</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeTerminalModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication on page load
+        window.addEventListener('load', function() {
+            if (sessionStorage.getItem('adminAuthenticated') !== 'true') {
+                window.location.href = 'admin_login.html';
+            }
+            updateDashboard();
+        });
+
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+            document.getElementById(page).classList.add('active');
+            event.target.classList.add('active');
+
+            if (page === 'students') {
+                loadStudentsTable();
+            } else if (page === 'cafs') {
+                loadCafsTable();
+            } else if (page === 'meal-logs') {
+                loadMealLogsTable();
+            }
+        }
+
+        function updateDashboard() {
+            const students = JSON.parse(localStorage.getItem('students')) || {};
+            const mealLogs = JSON.parse(localStorage.getItem('mealLogs')) || [];
+            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
+            const terminals = JSON.parse(localStorage.getItem('terminals')) || [];
+
+            document.getElementById('totalStudents').textContent = Object.keys(students).length;
+            document.getElementById('mealToday').textContent = mealLogs.length;
+            document.getElementById('activeCafs').textContent = cafs.length;
+            document.getElementById('activeTerminals').textContent = terminals.length;
+        }
+
+        function loadStudentsTable() {
+            const students = JSON.parse(localStorage.getItem('students')) || {};
+            const tbody = document.getElementById('studentsTable');
+
+            if (Object.keys(students).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-title">No students yet</div><p>Students will appear here once they register</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = Object.entries(students).map(([matricNumber, student]) => `
+                <tr>
+                    <td>${matricNumber}</td>
+                    <td>${student.name}</td>
+                    <td>${student.department}</td>
+                    <td>${student.level}</td>
+                </tr>
+            `).join('');
+        }
+
+        function loadCafsTable() {
+            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
+            const tbody = document.getElementById('cafsTable');
+
+            if (cafs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">🍽️</div><div class="empty-state-title">No CAFs configured</div><p>Add a new CAF to get started</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = cafs.map(caf => `
+                <tr>
+                    <td>${caf.name}</td>
+                    <td>${caf.building}</td>
+                    <td>${caf.capacity}</td>
+                    <td><span class="badge badge-success">Active</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function loadMealLogsTable() {
+            const mealLogs = JSON.parse(localStorage.getItem('mealLogs')) || [];
+            const students = JSON.parse(localStorage.getItem('students')) || {};
+            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
+            const tbody = document.getElementById('logsTable');
+
+            if (mealLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No meal logs</div><p>Meal transactions will appear here</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = mealLogs.map(log => {
+                const student = students[log.matricNumber] || {};
+                const caf = cafs.find(c => c.id === log.cafId) || {};
+                return `
+                    <tr>
+                        <td>${log.matricNumber}</td>
+                        <td>${student.name || '-'}</td>
+                        <td>${caf.name || '-'}</td>
+                        <td>${log.timestamp}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openCAFModal() {
+            document.getElementById('cafModal').classList.add('active');
+            document.getElementById('cafForm').reset();
+        }
+
+        function closeCAFModal() {
+            document.getElementById('cafModal').classList.remove('active');
+        }
+
+        function handleAddCAF(e) {
+            e.preventDefault();
+
+            const caf = {
+                id: 'CAF-' + Date.now(),
+                name: document.getElementById('cafName').value,
+                building: document.getElementById('cafBuilding').value,
+                capacity: document.getElementById('cafCapacity').value
+            };
+
+            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
+            cafs.push(caf);
+            localStorage.setItem('cafs', JSON.stringify(cafs));
+
+            closeCAFModal();
+            updateDashboard();
+            loadCafsTable();
+        }
+
+        function openTerminalModal() {
+            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
+            const select = document.getElementById('terminalCAF');
+            select.innerHTML = '<option value="">-- Select CAF --</option>';
+            cafs.forEach(caf => {
+                const option = document.createElement('option');
+                option.value = caf.id;
+                option.textContent = caf.name;
+                select.appendChild(option);
+            });
+
+            document.getElementById('terminalModal').classList.add('active');
+            document.getElementById('terminalForm').reset();
+        }
+
+        function closeTerminalModal() {
+            document.getElementById('terminalModal').classList.remove('active');
+        }
+
+        function handleAddTerminal(e) {
+            e.preventDefault();
+
+            const terminal = {
+                id: document.getElementById('terminalId').value,
+                cafId: document.getElementById('terminalCAF').value,
+                location: document.getElementById('terminalLocation').value
+            };
+
+            const terminals = JSON.parse(localStorage.getItem('terminals')) || [];
+            terminals.push(terminal);
+            localStorage.setItem('terminals', JSON.stringify(terminals));
+
+            closeTerminalModal();
+            updateDashboard();
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('adminAuthenticated');
+            sessionStorage.removeItem('adminUsername');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

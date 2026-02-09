@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - University CAF System</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 1.25rem 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .user-info {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .logout-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.65rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #dc2626;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: #999;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-action {
+            flex: 1;
+            min-width: 150px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .quick-action:hover {
+            background-color: #1d4ed8;
+        }
+
+        .quick-action.secondary {
+            background-color: #6b7280;
+        }
+
+        .quick-action.secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .barcode-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .barcode-matric {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .attendance-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .attendance-table thead {
+            background-color: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .attendance-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .attendance-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .attendance-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.attended {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input[readonly] {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel,
+        .btn-submit {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-cancel {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-cancel:hover {
+            background-color: #d1d5db;
+        }
+
+        .success-message {
+            display: none;
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .header-left {
+                width: 100%;
+                justify-content: space-between;
+                gap: 0;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            .user-info {
+                font-size: 0.85rem;
+            }
+
+            .logout-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            main {
+                padding: 0 1rem;
+                margin: 1.5rem auto;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .page-subtitle {
+                font-size: 0.85rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .card {
+                padding: 1.25rem;
+            }
+
+            .stats-container {
+                flex-direction: row;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .quick-action {
+                width: 100%;
+                min-width: unset;
+                padding: 0.85rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .attendance-section {
+                padding: 1.25rem;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .attendance-table thead {
+                display: none;
+            }
+
+            .attendance-table tbody {
+                display: block;
+            }
+
+            .attendance-table tr {
+                display: block;
+                background-color: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .attendance-table td {
+                display: block;
+                padding: 0.5rem 0;
+                border: none;
+                border-bottom: 1px solid #e5e7eb;
+                text-align: left;
+            }
+
+            .attendance-table td:last-child {
+                border-bottom: none;
+            }
+
+            .attendance-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #555;
+                display: block;
+                margin-bottom: 0.25rem;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px;
+                padding: 0.85rem;
+            }
+
+            .modal-buttons {
+                flex-direction: column-reverse;
+            }
+
+            .btn-cancel,
+            .btn-submit {
+                width: 100%;
+                padding: 0.85rem;
+            }
+
+            .success-message {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+
+            header {
+                padding: 0.75rem;
+            }
+
+            .header-container {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .header-left {
+                flex-direction: column;
+                gap: 0.25rem;
+                justify-content: flex-start;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+                font-weight: 700;
+            }
+
+            .user-name {
+                display: block;
+                font-size: 0.8rem;
+            }
+
+            .user-info {
+                font-size: 0.75rem;
+            }
+
+            .logout-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            main {
+                padding: 0 0.75rem;
+                margin: 1rem auto;
+            }
+
+            .page-title {
+                font-size: 1.25rem;
+            }
+
+            .page-subtitle {
+                font-size: 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .dashboard-grid {
+                gap: 0.75rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .quick-action {
+                font-size: 0.8rem;
+                padding: 0.75rem;
+            }
+
+            .attendance-section {
+                padding: 1rem;
+            }
+
+            .attendance-table tr {
+                padding: 0.85rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .attendance-table td {
+                font-size: 0.8rem;
+                padding: 0.35rem 0;
+            }
+
+            .attendance-table td::before {
+                font-size: 0.75rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.25rem;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                font-size: 0.8rem;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px;
+                padding: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo">🎓 CAF System</div>
+                <div class="user-info">
+                    Welcome, <span class="user-name" id="displayName">Student</span>
+                    <div style="font-size: 0.8rem; margin-top: 0.25rem;">Level: <span id="displayLevel">100</span></div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle">Manage your cafeteria attendance and meals</div>
+
+        <!-- Quick Stats -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-title">Quick Stats</div>
+                <div class="stats-container">
+                    <div class="stat">
+                        <div class="stat-value" id="mealsThisMonth">0</div>
+                        <div class="stat-label">Meals This Month</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="mealsThisWeek">0</div>
+                        <div class="stat-label">Meals This Week</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-title">Quick Actions</div>
+                <div class="quick-actions">
+                    <button class="quick-action" onclick="openModal('bookFoodModal')">📦 Request RFID</button>
+                    <button class="quick-action secondary" onclick="openModal('updateProfileModal')">⚙️ Update Profile</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Your Barcode</div>
+                <div class="barcode-wrap">
+                    <svg id="studentBarcode"></svg>
+                    <div class="barcode-matric" id="barcodeMatric">Matric: --</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Section -->
+        <div class="attendance-section">
+            <div class="section-title">Recent Attendance</div>
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Meal Type</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTableBody">
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <div>No attendance records yet</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Book Food Modal -->
+    <div class="modal" id="bookFoodModal">
+        <div class="modal-content">
+            <div class="modal-title">Book Food Ahead</div>
+            <p style="color: #666; margin-bottom: 1.5rem;">Coming soon! This feature will allow you to pre-order meals and have them delivered to your hostel.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('bookFoodModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Profile Modal -->
+    <div class="modal" id="updateProfileModal">
+        <div class="modal-content">
+            <div class="modal-title">Update Profile</div>
+            <form onsubmit="handleProfileUpdate(event)">
+                <div class="form-group">
+                    <label>Matric Number</label>
+                    <input type="text" id="matricEdit" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="nameEdit">
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" id="departmentEdit">
+                </div>
+                <div class="form-group">
+                    <label>Current Level</label>
+                    <select id="levelEdit">
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="300">300</option>
+                        <option value="400">400</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeModal('updateProfileModal')">Cancel</button>
+                    <button type="submit" class="btn-submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">✓ Changes saved successfully!</div>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentUserId = null;
+        let studentData = null;
+
+        function renderBarcode(matricNumber) {
+            if (!matricNumber) {
+                return;
+            }
+            JsBarcode("#studentBarcode", matricNumber, {
+                format: "CODE128",
+                lineColor: "#111827",
+                width: 2,
+                height: 70,
+                displayValue: false
+            });
+            document.getElementById('barcodeMatric').textContent = `Matric: ${matricNumber}`;
+        }
+
+        async function loadDashboard(userId) {
+            const studentRef = doc(db, 'students', userId);
+            const studentSnap = await getDoc(studentRef);
+
+            if (!studentSnap.exists()) {
+                await signOut(auth);
+                window.location.href = 'student_login.html';
+                return;
+            }
+
+            studentData = studentSnap.data();
+            document.getElementById('displayName').textContent = studentData.fullName || 'Student';
+            document.getElementById('displayLevel').textContent = studentData.level || '100';
+
+            document.getElementById('matricEdit').value = studentData.matricNumber || '';
+            document.getElementById('nameEdit').value = studentData.fullName || '';
+            document.getElementById('departmentEdit').value = studentData.department || '';
+            document.getElementById('levelEdit').value = studentData.level || '100';
+
+            renderBarcode(studentData.matricNumber);
+            await loadAttendance(userId);
+        }
+
+        async function loadAttendance(userId) {
+            const attendanceRef = collection(db, 'students', userId, 'attendance');
+            const attendanceQuery = query(attendanceRef, orderBy('timestamp', 'desc'), limit(20));
+            const attendanceSnapshot = await getDocs(attendanceQuery);
+            const tbody = document.getElementById('attendanceTableBody');
+
+            if (attendanceSnapshot.empty) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <div>No attendance records yet</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('mealsThisMonth').textContent = '0';
+                document.getElementById('mealsThisWeek').textContent = '0';
+                return;
+            }
+
+            const now = new Date();
+            const attendance = attendanceSnapshot.docs.map(docSnap => docSnap.data());
+
+            const thisMonth = attendance.filter(record => {
+                const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+                return recordDate.getMonth() === now.getMonth() && recordDate.getFullYear() === now.getFullYear();
+            });
+
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const thisWeek = attendance.filter(record => {
+                const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+                return recordDate >= weekAgo;
+            });
+
+            document.getElementById('mealsThisMonth').textContent = thisMonth.length;
+            document.getElementById('mealsThisWeek').textContent = thisWeek.length;
+
+            tbody.innerHTML = attendance.map(record => {
+                const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+                const displayDate = recordDate.toLocaleDateString();
+                const displayTime = recordDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <tr>
+                        <td data-label="Date">${displayDate}</td>
+                        <td data-label="Meal Type">${record.mealType || 'Standard'}</td>
+                        <td data-label="Time">${displayTime}</td>
+                        <td data-label="Status">
+                            <span class="status-badge attended">✓ Attended</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.openModal = function(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        };
+
+        window.handleProfileUpdate = async function(event) {
+            event.preventDefault();
+
+            if (!currentUserId) {
+                return;
+            }
+
+            const updatedData = {
+                fullName: document.getElementById('nameEdit').value.trim(),
+                department: document.getElementById('departmentEdit').value.trim(),
+                level: document.getElementById('levelEdit').value
+            };
+
+            await updateDoc(doc(db, 'students', currentUserId), updatedData);
+            closeModal('updateProfileModal');
+            await loadDashboard(currentUserId);
+            showSuccess('Profile updated successfully!');
+        };
+
+        window.handleLogout = async function() {
+            if (confirm('Are you sure you want to logout?')) {
+                await signOut(auth);
+                window.location.href = 'student_login.html';
+            }
+        };
+
+        function showSuccess(message) {
+            const msgElement = document.getElementById('successMessage');
+            msgElement.textContent = '✓ ' + message;
+            msgElement.classList.add('show');
+            setTimeout(() => msgElement.classList.remove('show'), 3000);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'student_login.html';
+                return;
+            }
+            currentUserId = user.uid;
+            loadDashboard(user.uid).catch(error => console.error('Dashboard error:', error));
+        });
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
