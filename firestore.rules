@@ -55,6 +55,12 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid;
     }
 
+    match /updates/{updateId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
     match /admins/{adminId} {
       allow read: if isAdmin();
       // One-time bootstrap: allow any signed-in user to create their own admin doc

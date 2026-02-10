@@ -130,6 +130,18 @@
             gap: 16px;
         }
 
+        .menu-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--color-border);
+            background: rgba(15, 23, 42, 0.8);
+            color: var(--color-text);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
         .admin-info {
             font-size: 13px;
             text-align: right;
@@ -334,6 +346,56 @@
             margin-top: 16px;
         }
 
+        .updates-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 420px) 1fr;
+            gap: 16px;
+        }
+
+        .update-card {
+            background-color: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .update-card h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .update-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .update-item {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .update-item h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .update-meta {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .update-message {
+            font-size: 13px;
+            color: var(--color-text);
+        }
+
         .analysis-card {
             background-color: var(--color-bg);
             border: 1px solid var(--color-border);
@@ -488,6 +550,131 @@
             margin-bottom: 8px;
         }
 
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 3000;
+            max-width: 360px;
+        }
+
+        .toast {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--color-border);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+            color: var(--color-text);
+            animation: slideInToast 0.3s ease;
+        }
+
+        .toast.success {
+            border-left-color: var(--color-success);
+        }
+
+        .toast.error {
+            border-left-color: var(--color-error);
+        }
+
+        .toast.warning {
+            border-left-color: var(--color-warning);
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+
+        @keyframes slideInToast {
+            from {
+                transform: translateX(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+            backdrop-filter: blur(6px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-card {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.45);
+            text-align: center;
+            min-width: 240px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid rgba(56, 189, 248, 0.2);
+            border-top-color: var(--color-primary);
+            margin: 0 auto 12px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .alert-message {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .alert-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--color-border);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--color-text);
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 200px;
@@ -511,6 +698,16 @@
                 gap: 12px;
             }
 
+            .menu-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .updates-grid {
+                grid-template-columns: 1fr;
+            }
+
             table {
                 font-size: 12px;
             }
@@ -522,11 +719,25 @@
 
         @media (max-width: 640px) {
             .sidebar {
-                width: 160px;
+                width: 220px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
             }
 
             .main-container {
-                margin-left: 160px;
+                margin-left: 0;
+            }
+
+            body.nav-open .sidebar {
+                transform: translateX(0);
+            }
+
+            body.nav-open::after {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.65);
+                z-index: 900;
             }
 
             .sidebar-nav a {
@@ -545,6 +756,12 @@
             .modal-content {
                 padding: 20px;
             }
+
+            .toast-container {
+                right: 12px;
+                left: 12px;
+                max-width: unset;
+            }
         }
     </style>
 </head>
@@ -562,6 +779,7 @@
                 <li><a href="#" onclick="navigateTo(event, 'terminals')" class="nav-link">Terminals</a></li>
                 <li><a href="#" onclick="navigateTo(event, 'meal-sessions')" class="nav-link">Meal Sessions</a></li>
                 <li><a href="#" onclick="navigateTo(event, 'meal-logs')" class="nav-link">Meal Logs</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'updates')" class="nav-link">Updates</a></li>
                 <li><a href="#" onclick="navigateTo(event, 'settings')" class="nav-link">Settings</a></li>
             </ul>
         </nav>
@@ -570,6 +788,7 @@
     <div class="main-container">
         <header class="header">
             <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
                 <h1 class="header-title">Administration</h1>
             </div>
             <div class="header-right">
@@ -860,6 +1079,72 @@
                 </div>
             </div>
 
+            <div id="updates" class="page">
+                <div class="page-title">Student Updates</div>
+                <div class="page-subtitle">Send announcements to all students or filtered groups</div>
+
+                <div class="updates-grid">
+                    <div class="update-card">
+                        <h3>Create Update</h3>
+                        <form id="updateForm">
+                            <div class="form-group">
+                                <label for="updateTitle">Title</label>
+                                <input type="text" id="updateTitle" required placeholder="e.g. Breakfast timing update">
+                            </div>
+                            <div class="form-group">
+                                <label for="updateMessage">Message</label>
+                                <textarea id="updateMessage" rows="4" required placeholder="Write a quick update for students..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="updateAudience">Audience</label>
+                                <select id="updateAudience">
+                                    <option value="all">All Students</option>
+                                    <option value="department">By Department</option>
+                                    <option value="level">By Level</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="updateDepartment">Department</label>
+                                    <select id="updateDepartment">
+                                        <option value="">Select Department</option>
+                                        <option value="engineering">FOE</option>
+                                        <option value="sciences">FOS</option>
+                                        <option value="business">FBSS</option>
+                                        <option value="humanities">FOA</option>
+                                        <option value="medicine">FBMS</option>
+                                        <option value="law">FOL</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="updateLevel">Level</label>
+                                    <select id="updateLevel">
+                                        <option value="">Select Level</option>
+                                        <option value="100">100</option>
+                                        <option value="200">200</option>
+                                        <option value="300">300</option>
+                                        <option value="400">400</option>
+                                        <option value="500">500</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn" type="submit">Send Update</button>
+                        </form>
+                    </div>
+
+                    <div class="update-card">
+                        <h3>Recent Updates</h3>
+                        <div class="update-list" id="updatesList">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📣</div>
+                                <div class="empty-state-title">No updates yet</div>
+                                <p>Updates you send will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="settings" class="page">
                 <div class="page-title">Settings</div>
                 <div class="page-subtitle">System configuration</div>
@@ -871,6 +1156,30 @@
                         <p style="margin-bottom: 12px;"><strong>Version:</strong> 1.0.0</p>
                         <p><strong>Last Updated:</strong> 2025-01-01</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="spinner"></div>
+            <div id="loadingMessage">Loading data...</div>
+        </div>
+    </div>
+
+    <div class="modal" id="alertModal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closeAlertModal()">&times;</button>
+            <div class="modal-title" id="alertTitle">Notice</div>
+            <div class="alert-body">
+                <div class="alert-message" id="alertMessage"></div>
+                <input class="alert-input" id="alertInput" type="text" placeholder="" style="display: none;">
+                <div class="alert-actions">
+                    <button class="btn btn-secondary" id="alertCancelBtn">Cancel</button>
+                    <button class="btn" id="alertConfirmBtn">Confirm</button>
                 </div>
             </div>
         </div>
@@ -995,10 +1304,101 @@
         let rfidRequestsData = [];
         let mealSessionsData = [];
         let feedbackData = [];
+        let updatesData = [];
         let studentSearchTerm = '';
         let unsubscribers = [];
         let weeklyMealsChart = null;
         let cafShareChart = null;
+        let pendingLoads = new Set();
+
+        const toastContainer = document.getElementById('toastContainer');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const alertModal = document.getElementById('alertModal');
+        const alertTitle = document.getElementById('alertTitle');
+        const alertMessage = document.getElementById('alertMessage');
+        const alertInput = document.getElementById('alertInput');
+        const alertCancelBtn = document.getElementById('alertCancelBtn');
+        const alertConfirmBtn = document.getElementById('alertConfirmBtn');
+        let alertResolver = null;
+
+        function showToast(message, type = 'info', title = 'Update') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3200);
+        }
+
+        function setLoading(isLoading, message = 'Loading data...') {
+            if (isLoading) {
+                loadingMessage.textContent = message;
+                loadingOverlay.classList.add('active');
+            } else {
+                loadingOverlay.classList.remove('active');
+            }
+        }
+
+        function initRealtimeLoading() {
+            pendingLoads = new Set(['students', 'cafs', 'terminals', 'mealLogs', 'rfidRequests', 'mealSessions', 'feedback', 'updates']);
+            setLoading(true, 'Syncing live data...');
+        }
+
+        function markLoaded(key) {
+            if (pendingLoads.has(key)) {
+                pendingLoads.delete(key);
+            }
+            if (pendingLoads.size === 0) {
+                setLoading(false);
+            }
+        }
+
+        function openAlertModal({ title = 'Notice', message = '', confirmText = 'Confirm', cancelText = 'Cancel', showInput = false, inputPlaceholder = '' } = {}) {
+            alertTitle.textContent = title;
+            alertMessage.textContent = message;
+            alertConfirmBtn.textContent = confirmText;
+            alertCancelBtn.textContent = cancelText;
+            alertInput.style.display = showInput ? 'block' : 'none';
+            alertInput.value = '';
+            alertInput.placeholder = inputPlaceholder;
+            alertModal.classList.add('active');
+
+            return new Promise((resolve) => {
+                alertResolver = resolve;
+                if (showInput) {
+                    setTimeout(() => alertInput.focus(), 50);
+                }
+            });
+        }
+
+        window.closeAlertModal = function(result = null) {
+            alertModal.classList.remove('active');
+            if (alertResolver) {
+                const resolver = alertResolver;
+                alertResolver = null;
+                resolver(result);
+            }
+        };
+
+        alertCancelBtn.addEventListener('click', () => closeAlertModal(null));
+        alertConfirmBtn.addEventListener('click', () => {
+            if (alertInput.style.display !== 'none') {
+                closeAlertModal(alertInput.value.trim());
+            } else {
+                closeAlertModal(true);
+            }
+        });
+
+        alertModal.addEventListener('click', (e) => {
+            if (e.target === alertModal) {
+                closeAlertModal(null);
+            }
+        });
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -1017,7 +1417,12 @@
             document.getElementById('adminName').textContent = adminSnap.data()?.name || user.email || 'System Admin';
             startRealtimeListeners();
             wireStudentSearch();
+            wireUpdateForm();
         });
+
+        window.toggleSidebar = function() {
+            document.body.classList.toggle('nav-open');
+        };
 
         window.navigateTo = function(event, page) {
             event.preventDefault();
@@ -1039,8 +1444,24 @@
                 renderRfidRequestsTable();
             } else if (page === 'meal-sessions') {
                 renderMealSessionsTable();
+            } else if (page === 'updates') {
+                renderUpdatesList();
             }
+
+            document.body.classList.remove('nav-open');
         };
+
+        document.addEventListener('click', (event) => {
+            if (!document.body.classList.contains('nav-open')) {
+                return;
+            }
+            const sidebar = document.querySelector('.sidebar');
+            const toggle = document.querySelector('.menu-toggle');
+            if (sidebar.contains(event.target) || toggle.contains(event.target)) {
+                return;
+            }
+            document.body.classList.remove('nav-open');
+        });
 
         function parseTimestamp(value) {
             if (!value) {
@@ -1250,6 +1671,113 @@
             }).join('');
         }
 
+        function renderUpdatesList() {
+            const list = document.getElementById('updatesList');
+            if (!list) {
+                return;
+            }
+            if (updatesData.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📣</div>
+                        <div class="empty-state-title">No updates yet</div>
+                        <p>Updates you send will appear here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = updatesData.map(update => {
+                const ts = parseTimestamp(update.createdAt);
+                const timeLabel = ts ? ts.toLocaleString() : 'Just now';
+                const audienceLabel = update.audience === 'department'
+                    ? `Department: ${update.department || 'All'}`
+                    : update.audience === 'level'
+                        ? `Level: ${update.level || 'All'}`
+                        : 'All Students';
+                return `
+                    <div class="update-item">
+                        <h4>${update.title || 'Update'}</h4>
+                        <div class="update-meta">${audienceLabel} • ${timeLabel}</div>
+                        <div class="update-message">${update.message || ''}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function wireUpdateForm() {
+            const form = document.getElementById('updateForm');
+            if (!form) {
+                return;
+            }
+
+            const audienceSelect = document.getElementById('updateAudience');
+            const departmentSelect = document.getElementById('updateDepartment');
+            const levelSelect = document.getElementById('updateLevel');
+
+            function updateAudienceFields() {
+                const audience = audienceSelect.value;
+                const isDepartment = audience === 'department';
+                const isLevel = audience === 'level';
+                departmentSelect.disabled = !isDepartment;
+                levelSelect.disabled = !isLevel;
+                if (!isDepartment) {
+                    departmentSelect.value = '';
+                }
+                if (!isLevel) {
+                    levelSelect.value = '';
+                }
+            }
+
+            updateAudienceFields();
+            audienceSelect.addEventListener('change', updateAudienceFields);
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const title = document.getElementById('updateTitle').value.trim();
+                const message = document.getElementById('updateMessage').value.trim();
+                const audience = document.getElementById('updateAudience').value;
+                const department = document.getElementById('updateDepartment').value;
+                const level = document.getElementById('updateLevel').value;
+
+                if (!title || !message) {
+                    showToast('Please fill in the title and message.', 'warning', 'Updates');
+                    return;
+                }
+
+                if (audience === 'department' && !department) {
+                    showToast('Select a department for this update.', 'warning', 'Updates');
+                    return;
+                }
+
+                if (audience === 'level' && !level) {
+                    showToast('Select a level for this update.', 'warning', 'Updates');
+                    return;
+                }
+
+                const updatePayload = {
+                    title,
+                    message,
+                    audience,
+                    department: audience === 'department' ? department : '',
+                    level: audience === 'level' ? level : '',
+                    createdAt: serverTimestamp()
+                };
+
+                try {
+                    setLoading(true, 'Sending update...');
+                    await addDoc(collection(db, 'updates'), updatePayload);
+                    form.reset();
+                    showToast('Update sent successfully.', 'success', 'Updates');
+                } catch (error) {
+                    console.error(error);
+                    showToast('Failed to send update.', 'error', 'Updates');
+                } finally {
+                    setLoading(false);
+                }
+            });
+        }
+
         function renderAnalytics() {
             const now = new Date();
             const start = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
@@ -1396,12 +1924,14 @@
         function startRealtimeListeners() {
             unsubscribers.forEach(unsub => unsub && unsub());
             unsubscribers = [];
+            initRealtimeLoading();
 
             unsubscribers.push(onSnapshot(collection(db, 'students'), (snapshot) => {
                 studentsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderStudentsTable();
                 renderFeedbackTable();
                 updateDashboard();
+                markLoaded('students');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'cafs'), (snapshot) => {
@@ -1411,12 +1941,14 @@
                 renderMealLogsTable();
                 renderAnalytics();
                 updateDashboard();
+                markLoaded('cafs');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'terminals'), (snapshot) => {
                 terminalsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderTerminalsTable();
                 updateDashboard();
+                markLoaded('terminals');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'mealLogs'), (snapshot) => {
@@ -1424,23 +1956,34 @@
                 renderMealLogsTable();
                 renderAnalytics();
                 updateDashboard();
+                markLoaded('mealLogs');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'rfidRequests'), (snapshot) => {
                 rfidRequestsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderRfidRequestsTable();
+                markLoaded('rfidRequests');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'mealSessions'), (snapshot) => {
                 mealSessionsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderMealSessionsTable();
                 renderAnalytics();
+                markLoaded('mealSessions');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'feedback'), (snapshot) => {
                 feedbackData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderFeedbackTable();
                 renderAnalytics();
+                markLoaded('feedback');
+            }));
+
+            const updatesQuery = query(collection(db, 'updates'), orderBy('createdAt', 'desc'), limit(20));
+            unsubscribers.push(onSnapshot(updatesQuery, (snapshot) => {
+                updatesData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderUpdatesList();
+                markLoaded('updates');
             }));
         }
 
@@ -1449,9 +1992,14 @@
             if (!input) {
                 return;
             }
+            let debounceTimer = null;
             input.addEventListener('input', (e) => {
-                studentSearchTerm = e.target.value || '';
-                renderStudentsTable();
+                const value = e.target.value || '';
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    studentSearchTerm = value;
+                    renderStudentsTable();
+                }, 200);
             });
         }
 
@@ -1499,11 +2047,26 @@
         };
 
         window.deleteMealSession = async function(sessionId) {
-            if (!confirm('Delete this meal session?')) {
+            const confirmed = await openAlertModal({
+                title: 'Deactivate Meal Session',
+                message: 'This will mark the session as inactive. Students will no longer see it in active choices.',
+                confirmText: 'Deactivate',
+                cancelText: 'Cancel'
+            });
+            if (!confirmed) {
                 return;
             }
-            await updateDoc(doc(db, 'mealSessions', sessionId), { status: 'Inactive', updatedAt: serverTimestamp() });
-            renderMealSessionsTable();
+            try {
+                setLoading(true, 'Updating session...');
+                await updateDoc(doc(db, 'mealSessions', sessionId), { status: 'Inactive', updatedAt: serverTimestamp() });
+                renderMealSessionsTable();
+                showToast('Meal session deactivated.', 'success', 'Meal Session');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not update the meal session.', 'error', 'Meal Session');
+            } finally {
+                setLoading(false);
+            }
         };
 
         window.openCAFModal = function() {
@@ -1525,10 +2088,19 @@
                 createdAt: serverTimestamp()
             };
 
-            await addDoc(collection(db, 'cafs'), caf);
-            closeCAFModal();
-            updateDashboard();
-            renderCafsTable();
+            try {
+                setLoading(true, 'Adding CAF...');
+                await addDoc(collection(db, 'cafs'), caf);
+                closeCAFModal();
+                updateDashboard();
+                renderCafsTable();
+                showToast('CAF added successfully.', 'success', 'CAF');
+            } catch (error) {
+                console.error(error);
+                showToast('Unable to add CAF right now.', 'error', 'CAF');
+            } finally {
+                setLoading(false);
+            }
         };
 
         window.openTerminalModal = async function() {
@@ -1557,26 +2129,58 @@
             };
 
             if (status === 'approved') {
-                const cardId = prompt('Enter RFID card ID for this student:');
+                const cardId = await openAlertModal({
+                    title: 'Assign RFID Card',
+                    message: 'Enter the RFID card ID for this student.',
+                    confirmText: 'Assign',
+                    cancelText: 'Cancel',
+                    showInput: true,
+                    inputPlaceholder: 'RFID Card ID'
+                });
                 if (!cardId) {
                     return;
                 }
                 updatePayload.rfidCardId = cardId;
-                await updateDoc(doc(db, 'students', studentId), {
-                    rfidStatus: 'approved',
-                    rfidCardId: cardId,
-                    updatedAt: serverTimestamp()
-                });
+                try {
+                    setLoading(true, 'Approving RFID...');
+                    await updateDoc(doc(db, 'students', studentId), {
+                        rfidStatus: 'approved',
+                        rfidCardId: cardId,
+                        updatedAt: serverTimestamp()
+                    });
+                    showToast('RFID approved and assigned.', 'success', 'RFID');
+                } catch (error) {
+                    console.error(error);
+                    showToast('Failed to approve RFID request.', 'error', 'RFID');
+                    setLoading(false);
+                    return;
+                }
             } else {
-                await updateDoc(doc(db, 'students', studentId), {
-                    rfidStatus: 'rejected',
-                    rfidCardId: '',
-                    updatedAt: serverTimestamp()
-                });
+                try {
+                    setLoading(true, 'Updating request...');
+                    await updateDoc(doc(db, 'students', studentId), {
+                        rfidStatus: 'rejected',
+                        rfidCardId: '',
+                        updatedAt: serverTimestamp()
+                    });
+                    showToast('RFID request rejected.', 'warning', 'RFID');
+                } catch (error) {
+                    console.error(error);
+                    showToast('Failed to update RFID request.', 'error', 'RFID');
+                    setLoading(false);
+                    return;
+                }
             }
 
-            await updateDoc(doc(db, 'rfidRequests', requestId), updatePayload);
-            renderRfidRequestsTable();
+            try {
+                await updateDoc(doc(db, 'rfidRequests', requestId), updatePayload);
+                renderRfidRequestsTable();
+            } catch (error) {
+                console.error(error);
+                showToast('Failed to update RFID record.', 'error', 'RFID');
+            } finally {
+                setLoading(false);
+            }
         };
 
         window.openMealSessionModal = function(keepData = false) {
@@ -1604,14 +2208,23 @@
                 updatedAt: serverTimestamp()
             };
 
-            if (sessionId) {
-                await updateDoc(doc(db, 'mealSessions', sessionId), session);
-            } else {
-                session.createdAt = serverTimestamp();
-                await addDoc(collection(db, 'mealSessions'), session);
+            try {
+                setLoading(true, sessionId ? 'Updating meal session...' : 'Adding meal session...');
+                if (sessionId) {
+                    await updateDoc(doc(db, 'mealSessions', sessionId), session);
+                } else {
+                    session.createdAt = serverTimestamp();
+                    await addDoc(collection(db, 'mealSessions'), session);
+                }
+                closeMealSessionModal();
+                renderMealSessionsTable();
+                showToast('Meal session saved.', 'success', 'Meal Session');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not save meal session.', 'error', 'Meal Session');
+            } finally {
+                setLoading(false);
             }
-            closeMealSessionModal();
-            renderMealSessionsTable();
         };
         window.handleAddTerminal = async function(e) {
             e.preventDefault();
@@ -1624,10 +2237,19 @@
                 createdAt: serverTimestamp()
             };
 
-            await addDoc(collection(db, 'terminals'), terminal);
-            closeTerminalModal();
-            updateDashboard();
-            renderTerminalsTable();
+            try {
+                setLoading(true, 'Adding terminal...');
+                await addDoc(collection(db, 'terminals'), terminal);
+                closeTerminalModal();
+                updateDashboard();
+                renderTerminalsTable();
+                showToast('Terminal added.', 'success', 'Terminal');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not add terminal.', 'error', 'Terminal');
+            } finally {
+                setLoading(false);
+            }
         };
 
         window.openBarcodeModal = function(matricNumber) {

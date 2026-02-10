@@ -37,6 +37,18 @@
             gap: 2rem;
         }
 
+        .nav-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
         .header-left {
             display: flex;
             align-items: center;
@@ -73,6 +85,26 @@
 
         .logout-btn:hover {
             background-color: #dc2626;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #cbd5f5;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(148, 163, 184, 0.2);
+            color: #f8fafc;
         }
 
         main {
@@ -142,6 +174,80 @@
         .stat-label {
             font-size: 0.85rem;
             color: #94a3b8;
+        }
+
+        .stat-compact {
+            text-align: left;
+        }
+
+        .stat-compact .stat-value {
+            font-size: 1.8rem;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .badge-pill {
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #bae6fd;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pill.locked {
+            background: rgba(148, 163, 184, 0.2);
+            color: #94a3b8;
+        }
+
+        .level-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .level-progress {
+            height: 100%;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            border-radius: 999px;
+        }
+
+        .updates-section {
+            background-color: rgba(15, 23, 42, 0.75);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .updates-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .update-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .update-item h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .update-meta {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 6px;
         }
 
         .quick-actions {
@@ -311,6 +417,17 @@
             border: 1px solid rgba(148, 163, 184, 0.25);
         }
 
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
         .modal-title {
             font-size: 1.5rem;
             font-weight: 700;
@@ -411,6 +528,122 @@
             display: block;
         }
 
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 3000;
+            max-width: 360px;
+        }
+
+        .toast {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-left: 4px solid #38bdf8;
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+            color: #e2e8f0;
+            animation: slideInToast 0.3s ease;
+        }
+
+        .toast.success {
+            border-left-color: #22c55e;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        .toast.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        @keyframes slideInToast {
+            from {
+                transform: translateX(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+            backdrop-filter: blur(6px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-card {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.45);
+            text-align: center;
+            min-width: 240px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid rgba(56, 189, 248, 0.2);
+            border-top-color: #38bdf8;
+            margin: 0 auto 12px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .alert-message {
+            color: #cbd5f5;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(400px);
@@ -439,6 +672,12 @@
                 gap: 0;
             }
 
+            .nav-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
             .logo {
                 font-size: 1.25rem;
             }
@@ -450,6 +689,17 @@
             .logout-btn {
                 padding: 0.5rem 1rem;
                 font-size: 0.85rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                display: none;
+            }
+
+            .nav-links.active {
+                display: flex;
             }
 
             main {
@@ -583,6 +833,12 @@
                 left: 1rem;
                 width: auto;
             }
+
+            .toast-container {
+                right: 12px;
+                left: 12px;
+                max-width: unset;
+            }
         }
 
         @media (max-width: 480px) {
@@ -709,17 +965,24 @@
     <header>
         <div class="header-container">
             <div class="header-left">
+                <button class="nav-toggle" onclick="toggleStudentNav()">☰</button>
                 <div class="logo">🎓 CAF System</div>
                 <div class="user-info">
                     Welcome, <span class="user-name" id="displayName">Student</span>
                     <div style="font-size: 0.8rem; margin-top: 0.25rem;">Level: <span id="displayLevel">100</span></div>
                 </div>
             </div>
-            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            <div class="nav-links" id="studentNav">
+                <a href="#overview">Overview</a>
+                <a href="#updates">Updates</a>
+                <a href="#attendance">Attendance</a>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
         </div>
     </header>
 
     <main>
+        <div id="overview"></div>
         <div class="page-title">Dashboard</div>
         <div class="page-subtitle">Manage your cafeteria attendance and meals</div>
 
@@ -762,9 +1025,79 @@
                     <div class="barcode-matric" id="barcodeMatric">Matric: --</div>
                 </div>
             </div>
+
+            <div class="card">
+                <div class="card-title">Cafeteria Streaks</div>
+                <div class="stats-container">
+                    <div class="stat stat-compact">
+                        <div class="stat-value" id="currentStreak">0</div>
+                        <div class="stat-label">Current Streak (Days)</div>
+                    </div>
+                    <div class="stat stat-compact">
+                        <div class="stat-value" id="bestStreak">0</div>
+                        <div class="stat-label">Best Streak (Days)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Caf Level</div>
+                <div style="font-size: 1.4rem; font-weight: 700; color: #38bdf8;" id="cafLevel">Level 1</div>
+                <div style="font-size: 0.85rem; color: #94a3b8; margin: 0.35rem 0;">Progress to next level</div>
+                <div class="level-bar">
+                    <div class="level-progress" id="levelProgress" style="width: 0%;"></div>
+                </div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.5rem;" id="levelHint">0 / 20 meals</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Badges</div>
+                <div class="badges" id="badgesList">
+                    <span class="badge-pill locked">Caf Rookie</span>
+                    <span class="badge-pill locked">Caf Warrior</span>
+                    <span class="badge-pill locked">Caf Champion</span>
+                    <span class="badge-pill locked">Caf Legend</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Top Stats</div>
+                <div class="stats-container">
+                    <div class="stat stat-compact">
+                        <div class="stat-value" id="totalMealsAll">0</div>
+                        <div class="stat-label">Total Meals</div>
+                    </div>
+                    <div class="stat stat-compact">
+                        <div class="stat-value" id="totalDays">0</div>
+                        <div class="stat-label">Active Days</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Email Updates</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                    <span style="font-size: 0.9rem; color: #cbd5f5;">Receive admin announcements</span>
+                    <label style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="emailUpdatesToggle" style="width: 18px; height: 18px;">
+                        <span id="emailUpdatesLabel" style="font-size: 0.85rem; color: #94a3b8;">Off</span>
+                    </label>
+                </div>
+                <div style="margin-top: 0.6rem; font-size: 0.8rem; color: #94a3b8;">Toggle to receive email notifications.</div>
+            </div>
         </div>
 
-        <div class="attendance-section">
+        <div class="updates-section" id="updates">
+            <div class="section-title">Campus Updates</div>
+            <div class="updates-list" id="studentUpdatesList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📣</div>
+                    <div>No updates yet</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="attendance-section" id="attendance">
             <div class="section-title">Recent Attendance</div>
             <table class="attendance-table">
                 <thead>
@@ -860,7 +1193,28 @@
         </div>
     </div>
 
-    <div class="success-message" id="successMessage">✓ Changes saved successfully!</div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="spinner"></div>
+            <div id="loadingMessage">Loading dashboard...</div>
+        </div>
+    </div>
+
+    <div class="modal" id="alertModal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closeAlertModal()">&times;</button>
+            <div class="modal-title" id="alertTitle">Notice</div>
+            <div class="alert-body">
+                <div class="alert-message" id="alertMessage"></div>
+                <div class="alert-actions">
+                    <button class="btn-cancel" id="alertCancelBtn" type="button">Cancel</button>
+                    <button class="btn-submit" id="alertConfirmBtn" type="button">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { auth, db } from "../firebase.js";
@@ -881,6 +1235,112 @@
         let studentData = null;
         let unsubscribeStudent = null;
         let unsubscribeAttendance = null;
+        let unsubscribeUpdates = null;
+        let pendingLoads = new Set();
+        let updatesData = [];
+
+        const toastContainer = document.getElementById('toastContainer');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const alertModal = document.getElementById('alertModal');
+        const alertTitle = document.getElementById('alertTitle');
+        const alertMessage = document.getElementById('alertMessage');
+        const alertCancelBtn = document.getElementById('alertCancelBtn');
+        const alertConfirmBtn = document.getElementById('alertConfirmBtn');
+        const emailToggle = document.getElementById('emailUpdatesToggle');
+        const emailLabel = document.getElementById('emailUpdatesLabel');
+        const updatesList = document.getElementById('studentUpdatesList');
+        let alertResolver = null;
+
+        function showToast(message, type = 'info', title = 'Update') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3200);
+        }
+
+        function setLoading(isLoading, message = 'Loading dashboard...') {
+            if (isLoading) {
+                loadingMessage.textContent = message;
+                loadingOverlay.classList.add('active');
+            } else {
+                loadingOverlay.classList.remove('active');
+            }
+        }
+
+        function initRealtimeLoading() {
+            pendingLoads = new Set(['student', 'attendance']);
+            setLoading(true, 'Syncing your dashboard...');
+        }
+
+        function markLoaded(key) {
+            if (pendingLoads.has(key)) {
+                pendingLoads.delete(key);
+            }
+            if (pendingLoads.size === 0) {
+                setLoading(false);
+            }
+        }
+
+        function openAlertModal({ title = 'Notice', message = '', confirmText = 'Confirm', cancelText = 'Cancel' } = {}) {
+            alertTitle.textContent = title;
+            alertMessage.textContent = message;
+            alertConfirmBtn.textContent = confirmText;
+            alertCancelBtn.textContent = cancelText;
+            alertModal.classList.add('active');
+
+            return new Promise((resolve) => {
+                alertResolver = resolve;
+            });
+        }
+
+        window.closeAlertModal = function(result = null) {
+            alertModal.classList.remove('active');
+            if (alertResolver) {
+                const resolver = alertResolver;
+                alertResolver = null;
+                resolver(result);
+            }
+        };
+
+        alertCancelBtn.addEventListener('click', () => closeAlertModal(null));
+        alertConfirmBtn.addEventListener('click', () => closeAlertModal(true));
+
+        alertModal.addEventListener('click', (e) => {
+            if (e.target === alertModal) {
+                closeAlertModal(null);
+            }
+        });
+
+        window.toggleStudentNav = function() {
+            const nav = document.getElementById('studentNav');
+            nav.classList.toggle('active');
+        };
+
+        document.addEventListener('click', (event) => {
+            const nav = document.getElementById('studentNav');
+            const toggle = document.querySelector('.nav-toggle');
+            if (!nav || !toggle) {
+                return;
+            }
+            if (nav.contains(event.target) || toggle.contains(event.target)) {
+                return;
+            }
+            nav.classList.remove('active');
+        });
+
+        document.querySelectorAll('#studentNav a').forEach(link => {
+            link.addEventListener('click', () => {
+                const nav = document.getElementById('studentNav');
+                nav.classList.remove('active');
+            });
+        });
 
         function renderBarcode(matricNumber) {
             if (!matricNumber) {
@@ -894,6 +1354,141 @@
                 displayValue: false
             });
             document.getElementById('barcodeMatric').textContent = `Matric: ${matricNumber}`;
+        }
+
+        function parseTimestamp(value) {
+            if (!value) {
+                return null;
+            }
+            if (value.toDate) {
+                return value.toDate();
+            }
+            return new Date(value);
+        }
+
+        function renderStudentUpdates() {
+            if (!updatesList) {
+                return;
+            }
+            if (!studentData || updatesData.length === 0) {
+                updatesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📣</div>
+                        <div>No updates yet</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const filtered = updatesData.filter(update => {
+                if (update.audience === 'department') {
+                    return update.department && update.department === studentData.department;
+                }
+                if (update.audience === 'level') {
+                    return update.level && String(update.level) === String(studentData.level);
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                updatesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📣</div>
+                        <div>No updates for your profile yet</div>
+                    </div>
+                `;
+                return;
+            }
+
+            updatesList.innerHTML = filtered.map(update => {
+                const ts = parseTimestamp(update.createdAt);
+                const timeLabel = ts ? ts.toLocaleString() : 'Just now';
+                return `
+                    <div class="update-item">
+                        <h4>${update.title || 'Update'}</h4>
+                        <div class="update-meta">${timeLabel}</div>
+                        <div class="update-message">${update.message || ''}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateStreaks(attendanceRecords) {
+            const days = new Set();
+            attendanceRecords.forEach(record => {
+                const dateKey = record.dateKey;
+                if (dateKey) {
+                    days.add(dateKey);
+                } else if (record.timestamp) {
+                    const d = parseTimestamp(record.timestamp);
+                    if (d) {
+                        days.add(d.toISOString().slice(0, 10));
+                    }
+                }
+            });
+
+            const sortedDays = Array.from(days).sort();
+            let bestStreak = 0;
+            let currentStreak = 0;
+            let streak = 0;
+
+            for (let i = 0; i < sortedDays.length; i += 1) {
+                if (i === 0) {
+                    streak = 1;
+                } else {
+                    const prev = new Date(sortedDays[i - 1]);
+                    const curr = new Date(sortedDays[i]);
+                    const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+                    streak = diff === 1 ? streak + 1 : 1;
+                }
+                if (streak > bestStreak) {
+                    bestStreak = streak;
+                }
+            }
+
+            const today = new Date();
+            const todayKey = today.toISOString().slice(0, 10);
+            const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+            const startKey = days.has(todayKey) ? todayKey : (days.has(yesterday.toISOString().slice(0, 10)) ? yesterday.toISOString().slice(0, 10) : null);
+
+            if (startKey) {
+                let cursor = new Date(startKey);
+                while (days.has(cursor.toISOString().slice(0, 10))) {
+                    currentStreak += 1;
+                    cursor = new Date(cursor.getTime() - 24 * 60 * 60 * 1000);
+                }
+            }
+
+            return { currentStreak, bestStreak, totalDays: days.size };
+        }
+
+        function renderAchievements(attendanceRecords) {
+            const totalMeals = attendanceRecords.length;
+            const { currentStreak, bestStreak, totalDays } = calculateStreaks(attendanceRecords);
+            document.getElementById('currentStreak').textContent = currentStreak;
+            document.getElementById('bestStreak').textContent = bestStreak;
+            document.getElementById('totalMealsAll').textContent = totalMeals;
+            document.getElementById('totalDays').textContent = totalDays;
+
+            const levelStep = 20;
+            const level = Math.min(5, Math.floor(totalMeals / levelStep) + 1);
+            const progress = totalMeals % levelStep;
+            const progressPercent = Math.min(100, Math.round((progress / levelStep) * 100));
+            document.getElementById('cafLevel').textContent = `Level ${level}`;
+            document.getElementById('levelProgress').style.width = `${progressPercent}%`;
+            document.getElementById('levelHint').textContent = `${progress} / ${levelStep} meals`;
+
+            const badges = [
+                { name: 'Caf Rookie', threshold: 5 },
+                { name: 'Caf Warrior', threshold: 15 },
+                { name: 'Caf Champion', threshold: 30 },
+                { name: 'Caf Legend', threshold: 50 }
+            ];
+            const badgesMarkup = badges.map(badge => {
+                const unlocked = totalMeals >= badge.threshold;
+                return `<span class="badge-pill ${unlocked ? '' : 'locked'}">${badge.name}</span>`;
+            }).join('');
+            document.getElementById('badgesList').innerHTML = badgesMarkup;
         }
 
         function updateRfidStatus(status, cardId) {
@@ -949,9 +1544,24 @@
                 document.getElementById('nameEdit').value = studentData.fullName || '';
                 document.getElementById('departmentEdit').value = studentData.department || '';
                 document.getElementById('levelEdit').value = studentData.level || '100';
+                if (emailToggle) {
+                    const enabled = Boolean(studentData.emailUpdates);
+                    emailToggle.checked = enabled;
+                    emailLabel.textContent = enabled ? 'On' : 'Off';
+                }
 
                 renderBarcode(studentData.matricNumber);
                 updateRfidStatus(studentData.rfidStatus || 'none', studentData.rfidCardId || '');
+                renderStudentUpdates();
+                markLoaded('student');
+            });
+        }
+
+        function listenToUpdates() {
+            const updatesQuery = query(collection(db, 'updates'), orderBy('createdAt', 'desc'), limit(10));
+            return onSnapshot(updatesQuery, (snapshot) => {
+                updatesData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderStudentUpdates();
             });
         }
 
@@ -978,6 +1588,8 @@
                     `;
                     document.getElementById('mealsThisMonth').textContent = '0';
                     document.getElementById('mealsThisWeek').textContent = '0';
+                    renderAchievements([]);
+                    markLoaded('attendance');
                     return;
                 }
 
@@ -997,6 +1609,7 @@
 
                 document.getElementById('mealsThisMonth').textContent = thisMonth.length;
                 document.getElementById('mealsThisWeek').textContent = thisWeek.length;
+                renderAchievements(attendance);
 
                 tbody.innerHTML = attendance.map(record => {
                     const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
@@ -1013,6 +1626,7 @@
                         </tr>
                     `;
                 }).join('');
+                markLoaded('attendance');
             });
         }
 
@@ -1040,7 +1654,7 @@
 
             await updateDoc(doc(db, 'students', currentUserId), updatedData);
             closeModal('updateProfileModal');
-            showSuccess('Profile updated successfully!');
+            showToast('Profile updated successfully!', 'success', 'Profile');
         };
 
         window.submitRfidRequest = async function() {
@@ -1069,7 +1683,7 @@
             });
 
             closeModal('rfidModal');
-            showSuccess('RFID request submitted!');
+            showToast('RFID request submitted!', 'success', 'RFID');
         };
 
         window.handleFeedbackSubmit = async function(event) {
@@ -1096,21 +1710,25 @@
             document.getElementById('feedbackRating').value = '';
             document.getElementById('feedbackComment').value = '';
             closeModal('feedbackModal');
-            showSuccess('Feedback submitted. Thank you!');
+            showToast('Feedback submitted. Thank you!', 'success', 'Feedback');
         };
 
         window.handleLogout = async function() {
-            if (confirm('Are you sure you want to logout?')) {
-                await signOut(auth);
-                window.location.href = 'student_login.html';
+            const confirmed = await openAlertModal({
+                title: 'Log Out',
+                message: 'Are you sure you want to logout now?',
+                confirmText: 'Logout',
+                cancelText: 'Stay'
+            });
+            if (!confirmed) {
+                return;
             }
+            await signOut(auth);
+            window.location.href = 'student_login.html';
         };
 
         function showSuccess(message) {
-            const msgElement = document.getElementById('successMessage');
-            msgElement.textContent = '✓ ' + message;
-            msgElement.classList.add('show');
-            setTimeout(() => msgElement.classList.remove('show'), 3000);
+            showToast(message, 'success', 'Update');
         }
 
         onAuthStateChanged(auth, (user) => {
@@ -1118,15 +1736,44 @@
                 window.location.href = 'student_login.html';
                 return;
             }
+            initRealtimeLoading();
             currentUserId = user.uid;
             listenToStudent(user.uid);
             listenToAttendance(user.uid);
+            if (unsubscribeUpdates) {
+                unsubscribeUpdates();
+            }
+            unsubscribeUpdates = listenToUpdates();
+
+            if (emailToggle) {
+                emailToggle.addEventListener('change', async () => {
+                    if (!currentUserId) {
+                        return;
+                    }
+                    const enabled = emailToggle.checked;
+                    emailLabel.textContent = enabled ? 'On' : 'Off';
+                    try {
+                        await updateDoc(doc(db, 'students', currentUserId), {
+                            emailUpdates: enabled,
+                            updatedAt: serverTimestamp()
+                        });
+                        showToast('Email update preference saved.', 'success', 'Notifications');
+                    } catch (error) {
+                        console.error(error);
+                        showToast('Could not save preference.', 'error', 'Notifications');
+                    }
+                });
+            }
         });
 
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
-                    modal.classList.remove('active');
+                    if (modal.id === 'alertModal') {
+                        closeAlertModal(null);
+                    } else {
+                        modal.classList.remove('active');
+                    }
                 }
             });
         });
