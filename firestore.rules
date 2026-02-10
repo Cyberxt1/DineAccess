@@ -57,7 +57,12 @@ service cloud.firestore {
 
     match /admins/{adminId} {
       allow read: if isAdmin();
-      allow create, update, delete: if false;
+      // One-time bootstrap: allow any signed-in user to create their own admin doc
+      // only when presenting the correct bootstrap key.
+      allow create: if isSignedIn()
+        && request.auth.uid == adminId
+        && request.resource.data.bootstrapKey == "CAF_BOOTSTRAP_2026";
+      allow update, delete: if false;
     }
   }
 }

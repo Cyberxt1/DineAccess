@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Bootstrap - University CAF System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at 20% 20%, #fef3c7, transparent 55%),
+                        radial-gradient(circle at 80% 0%, #bae6fd, transparent 45%),
+                        linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .card {
+            width: min(560px, 100%);
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.45);
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            color: #cbd5f5;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .warning {
+            background: rgba(249, 115, 22, 0.15);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+            color: #fdba74;
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.92rem;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: rgba(15, 23, 42, 0.4);
+            color: #f8fafc;
+            margin-bottom: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        button {
+            padding: 0.9rem 1.8rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fecaca;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Admin Bootstrap</h1>
+        <p>Use this page once to create the first admin account. After success, remove this file and tighten the admin rules.</p>
+        <div class="warning">
+            This page uses a bootstrap key to allow the first admin record. Change the credentials after setup.
+        </div>
+
+        <form id="bootstrapForm">
+            <label for="email">Admin Email</label>
+            <input id="email" type="email" value="admin@cafin.com" required />
+
+            <label for="password">Admin Password</label>
+            <input id="password" type="password" value="Admin@12345" required />
+
+            <button type="submit">Create Admin</button>
+        </form>
+
+        <div class="message success" id="successMessage">Admin created. You can now log in from the admin login page.</div>
+        <div class="message error" id="errorMessage"></div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const form = document.getElementById('bootstrapForm');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                await user.getIdToken();
+
+                await setDoc(doc(db, 'admins', user.uid), {
+                    email,
+                    role: 'superadmin',
+                    bootstrapKey: 'CAF_BOOTSTRAP_2026',
+                    createdAt: serverTimestamp()
+                });
+
+                successMessage.style.display = 'block';
+            } catch (error) {
+                console.error('Bootstrap error:', error);
+                errorMessage.textContent = error.message || 'Bootstrap failed';
+                errorMessage.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Admin';
+            }
+        });
+    </script>
+</body>
+</html>
