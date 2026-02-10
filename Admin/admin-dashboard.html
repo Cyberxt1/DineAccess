@@ -717,9 +717,9 @@
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 900px) {
             .sidebar {
-                width: 220px;
+                width: 240px;
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
             }
@@ -1932,6 +1932,10 @@
                 renderFeedbackTable();
                 updateDashboard();
                 markLoaded('students');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load students.', 'error', 'Sync');
+                markLoaded('students');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'cafs'), (snapshot) => {
@@ -1942,12 +1946,20 @@
                 renderAnalytics();
                 updateDashboard();
                 markLoaded('cafs');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load CAFs.', 'error', 'Sync');
+                markLoaded('cafs');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'terminals'), (snapshot) => {
                 terminalsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderTerminalsTable();
                 updateDashboard();
+                markLoaded('terminals');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load terminals.', 'error', 'Sync');
                 markLoaded('terminals');
             }));
 
@@ -1957,11 +1969,19 @@
                 renderAnalytics();
                 updateDashboard();
                 markLoaded('mealLogs');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load meal logs.', 'error', 'Sync');
+                markLoaded('mealLogs');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'rfidRequests'), (snapshot) => {
                 rfidRequestsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderRfidRequestsTable();
+                markLoaded('rfidRequests');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load RFID requests.', 'error', 'Sync');
                 markLoaded('rfidRequests');
             }));
 
@@ -1970,6 +1990,10 @@
                 renderMealSessionsTable();
                 renderAnalytics();
                 markLoaded('mealSessions');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load meal sessions.', 'error', 'Sync');
+                markLoaded('mealSessions');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'feedback'), (snapshot) => {
@@ -1977,12 +2001,20 @@
                 renderFeedbackTable();
                 renderAnalytics();
                 markLoaded('feedback');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load feedback.', 'error', 'Sync');
+                markLoaded('feedback');
             }));
 
             const updatesQuery = query(collection(db, 'updates'), orderBy('createdAt', 'desc'), limit(20));
             unsubscribers.push(onSnapshot(updatesQuery, (snapshot) => {
                 updatesData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderUpdatesList();
+                markLoaded('updates');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load updates.', 'error', 'Sync');
                 markLoaded('updates');
             }));
         }
