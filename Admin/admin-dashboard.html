@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - University CAF System</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <style>
         :root {
             --color-primary: #4299e1;
@@ -36,7 +37,6 @@
             overflow: hidden;
         }
 
-        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--color-bg-secondary);
@@ -91,7 +91,6 @@
             font-weight: 500;
         }
 
-        /* Main Content */
         .main-container {
             flex: 1;
             display: flex;
@@ -100,7 +99,6 @@
             overflow: hidden;
         }
 
-        /* Header */
         .header {
             background-color: var(--color-bg);
             border-bottom: 1px solid var(--color-border);
@@ -160,7 +158,6 @@
             background-color: #cbd5e0;
         }
 
-        /* Content Area */
         .content {
             flex: 1;
             overflow-y: auto;
@@ -188,7 +185,6 @@
             margin-bottom: 24px;
         }
 
-        /* Cards and Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -233,7 +229,6 @@
             margin-top: 4px;
         }
 
-        /* Tables */
         .table-container {
             background-color: var(--color-bg);
             border: 1px solid var(--color-border);
@@ -301,7 +296,6 @@
             color: #2c5282;
         }
 
-        /* Forms */
         .form-group {
             margin-bottom: 20px;
         }
@@ -336,7 +330,6 @@
             gap: 16px;
         }
 
-        /* Buttons */
         .btn {
             padding: 10px 16px;
             background-color: var(--color-primary);
@@ -362,7 +355,11 @@
             background-color: #cbd5e0;
         }
 
-        /* Modal */
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -408,7 +405,6 @@
             cursor: pointer;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 48px 24px;
@@ -427,7 +423,6 @@
             margin-bottom: 8px;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 width: 200px;
@@ -489,44 +484,39 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-title">CAF Admin</div>
         </div>
         <nav>
             <ul class="sidebar-nav">
-                <li><a href="#" onclick="navigateTo('dashboard')" class="nav-link active">Dashboard</a></li>
-                <li><a href="#" onclick="navigateTo('students')" class="nav-link">Students</a></li>
-                <li><a href="#" onclick="navigateTo('rfid-requests')" class="nav-link">RFID Requests</a></li>
-                <li><a href="#" onclick="navigateTo('cafs')" class="nav-link">CAFs</a></li>
-                <li><a href="#" onclick="navigateTo('terminals')" class="nav-link">Terminals</a></li>
-                <li><a href="#" onclick="navigateTo('meal-sessions')" class="nav-link">Meal Sessions</a></li>
-                <li><a href="#" onclick="navigateTo('meal-logs')" class="nav-link">Meal Logs</a></li>
-                <li><a href="#" onclick="navigateTo('settings')" class="nav-link">Settings</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'dashboard')" class="nav-link active">Dashboard</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'students')" class="nav-link">Students</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'rfid-requests')" class="nav-link">RFID Requests</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'cafs')" class="nav-link">CAFs</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'terminals')" class="nav-link">Terminals</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'meal-sessions')" class="nav-link">Meal Sessions</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'meal-logs')" class="nav-link">Meal Logs</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'settings')" class="nav-link">Settings</a></li>
             </ul>
         </nav>
     </aside>
 
-    <!-- Main Container -->
     <div class="main-container">
-        <!-- Header -->
         <header class="header">
             <div class="header-left">
                 <h1 class="header-title">Administration</h1>
             </div>
             <div class="header-right">
                 <div class="admin-info">
-                    <div class="admin-role">System Admin</div>
+                    <div class="admin-role" id="adminName">System Admin</div>
                     <div class="admin-status">Authenticated</div>
                 </div>
                 <button class="logout-btn" onclick="handleLogout()">Logout</button>
             </div>
         </header>
 
-        <!-- Content -->
         <div class="content">
-            <!-- Dashboard Page -->
             <div id="dashboard" class="page active">
                 <div class="page-title">Dashboard</div>
                 <div class="page-subtitle">Overview of cafeteria operations</div>
@@ -550,8 +540,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Students Page -->
             <div id="students" class="page">
                 <div class="page-title">Students</div>
                 <div class="page-subtitle">Manage student records</div>
@@ -564,11 +552,12 @@
                                 <th>Name</th>
                                 <th>Department</th>
                                 <th>Level</th>
+                                <th>Barcode</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTable">
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">📚</div>
                                         <div class="empty-state-title">No students yet</div>
@@ -581,7 +570,6 @@
                 </div>
             </div>
 
-            <!-- RFID Requests Page -->
             <div id="rfid-requests" class="page">
                 <div class="page-title">RFID Requests</div>
                 <div class="page-subtitle">Manage student RFID card requests</div>
@@ -611,7 +599,6 @@
                 </div>
             </div>
 
-            <!-- CAFs Page -->
             <div id="cafs" class="page">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <div>
@@ -646,7 +633,6 @@
                 </div>
             </div>
 
-            <!-- Terminals Page -->
             <div id="terminals" class="page">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <div>
@@ -680,8 +666,6 @@
                     </table>
                 </div>
             </div>
-
-            <!-- Meal Sessions Page -->
             <div id="meal-sessions" class="page">
                 <div class="page-title">Meal Sessions</div>
                 <div class="page-subtitle">Manage meal service periods</div>
@@ -711,7 +695,6 @@
                 </div>
             </div>
 
-            <!-- Meal Logs Page -->
             <div id="meal-logs" class="page">
                 <div class="page-title">Meal Logs</div>
                 <div class="page-subtitle">View all meal transactions</div>
@@ -741,7 +724,6 @@
                 </div>
             </div>
 
-            <!-- Settings Page -->
             <div id="settings" class="page">
                 <div class="page-title">Settings</div>
                 <div class="page-subtitle">System configuration</div>
@@ -758,7 +740,6 @@
         </div>
     </div>
 
-    <!-- CAF Modal -->
     <div id="cafModal" class="modal">
         <div class="modal-content" style="background-color: #a7aba9;">
             <button class="modal-close" onclick="closeCAFModal()">×</button>
@@ -785,7 +766,6 @@
         </div>
     </div>
 
-    <!-- Terminal Modal -->
     <div id="terminalModal" class="modal">
         <div class="modal-content" style="background-color: #a7aba9;">
             <button class="modal-close" onclick="closeTerminalModal()">×</button>
@@ -814,16 +794,54 @@
         </div>
     </div>
 
-    <script>
-        // Check authentication on page load
-        window.addEventListener('load', function() {
-            if (sessionStorage.getItem('adminAuthenticated') !== 'true') {
+    <div id="barcodeModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBarcodeModal()">×</button>
+            <div class="modal-title">Student Barcode</div>
+            <div style="text-align: center;">
+                <svg id="adminBarcode"></svg>
+                <div style="margin-top: 12px; font-size: 14px; color: var(--color-text-secondary);" id="barcodeLabel">Matric: --</div>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            addDoc,
+            collection,
+            doc,
+            getDoc,
+            getDocs,
+            orderBy,
+            query,
+            where,
+            serverTimestamp,
+            limit
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let cachedCafs = [];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
                 window.location.href = 'admin_login.html';
+                return;
             }
-            updateDashboard();
+
+            const adminRef = doc(db, 'admins', user.uid);
+            const adminSnap = await getDoc(adminRef);
+            if (!adminSnap.exists()) {
+                await signOut(auth);
+                window.location.href = 'admin_login.html';
+                return;
+            }
+
+            document.getElementById('adminName').textContent = adminSnap.data()?.name || user.email || 'System Admin';
+            await updateDashboard();
         });
 
-        function navigateTo(page) {
+        window.navigateTo = function(event, page) {
+            event.preventDefault();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
 
@@ -834,119 +852,207 @@
                 loadStudentsTable();
             } else if (page === 'cafs') {
                 loadCafsTable();
+            } else if (page === 'terminals') {
+                loadTerminalsTable();
             } else if (page === 'meal-logs') {
                 loadMealLogsTable();
+            } else if (page === 'rfid-requests') {
+                loadRfidRequestsTable();
+            } else if (page === 'meal-sessions') {
+                loadMealSessionsTable();
             }
+        };
+
+        async function updateDashboard() {
+            const studentsSnapshot = await getDocs(collection(db, 'students'));
+            const cafsSnapshot = await getDocs(collection(db, 'cafs'));
+            const terminalsSnapshot = await getDocs(collection(db, 'terminals'));
+
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const mealLogsQuery = query(collection(db, 'mealLogs'), where('timestamp', '>=', startOfDay));
+            const mealLogsSnapshot = await getDocs(mealLogsQuery);
+
+            document.getElementById('totalStudents').textContent = studentsSnapshot.size;
+            document.getElementById('mealToday').textContent = mealLogsSnapshot.size;
+            document.getElementById('activeCafs').textContent = cafsSnapshot.size;
+            document.getElementById('activeTerminals').textContent = terminalsSnapshot.size;
         }
 
-        function updateDashboard() {
-            const students = JSON.parse(localStorage.getItem('students')) || {};
-            const mealLogs = JSON.parse(localStorage.getItem('mealLogs')) || [];
-            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
-            const terminals = JSON.parse(localStorage.getItem('terminals')) || [];
-
-            document.getElementById('totalStudents').textContent = Object.keys(students).length;
-            document.getElementById('mealToday').textContent = mealLogs.length;
-            document.getElementById('activeCafs').textContent = cafs.length;
-            document.getElementById('activeTerminals').textContent = terminals.length;
-        }
-
-        function loadStudentsTable() {
-            const students = JSON.parse(localStorage.getItem('students')) || {};
+        async function loadStudentsTable() {
+            const studentsSnapshot = await getDocs(query(collection(db, 'students'), orderBy('createdAt', 'desc')));
             const tbody = document.getElementById('studentsTable');
 
-            if (Object.keys(students).length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-title">No students yet</div><p>Students will appear here once they register</p></div></td></tr>`;
+            if (studentsSnapshot.empty) {
+                tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-title">No students yet</div><p>Students will appear here once they register</p></div></td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = Object.entries(students).map(([matricNumber, student]) => `
-                <tr>
-                    <td>${matricNumber}</td>
-                    <td>${student.name}</td>
-                    <td>${student.department}</td>
-                    <td>${student.level}</td>
-                </tr>
-            `).join('');
-        }
-
-        function loadCafsTable() {
-            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
-            const tbody = document.getElementById('cafsTable');
-
-            if (cafs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">🍽️</div><div class="empty-state-title">No CAFs configured</div><p>Add a new CAF to get started</p></div></td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = cafs.map(caf => `
-                <tr>
-                    <td>${caf.name}</td>
-                    <td>${caf.building}</td>
-                    <td>${caf.capacity}</td>
-                    <td><span class="badge badge-success">Active</span></td>
-                </tr>
-            `).join('');
-        }
-
-        function loadMealLogsTable() {
-            const mealLogs = JSON.parse(localStorage.getItem('mealLogs')) || [];
-            const students = JSON.parse(localStorage.getItem('students')) || {};
-            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
-            const tbody = document.getElementById('logsTable');
-
-            if (mealLogs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No meal logs</div><p>Meal transactions will appear here</p></div></td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = mealLogs.map(log => {
-                const student = students[log.matricNumber] || {};
-                const caf = cafs.find(c => c.id === log.cafId) || {};
+            tbody.innerHTML = studentsSnapshot.docs.map(docSnap => {
+                const student = docSnap.data();
                 return `
                     <tr>
-                        <td>${log.matricNumber}</td>
-                        <td>${student.name || '-'}</td>
-                        <td>${caf.name || '-'}</td>
-                        <td>${log.timestamp}</td>
+                        <td>${student.matricNumber || '-'}</td>
+                        <td>${student.fullName || '-'}</td>
+                        <td>${student.department || '-'}</td>
+                        <td>${student.level || '-'}</td>
+                        <td><button class="btn btn-small" onclick="openBarcodeModal('${student.matricNumber || ''}')">Show</button></td>
                     </tr>
                 `;
             }).join('');
         }
 
-        function openCAFModal() {
+        async function loadCafsTable() {
+            const cafsSnapshot = await getDocs(collection(db, 'cafs'));
+            const tbody = document.getElementById('cafsTable');
+
+            cachedCafs = cafsSnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+
+            if (cachedCafs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">🍽️</div><div class="empty-state-title">No CAFs configured</div><p>Add a new CAF to get started</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = cachedCafs.map(caf => `
+                <tr>
+                    <td>${caf.name || '-'}</td>
+                    <td>${caf.building || '-'}</td>
+                    <td>${caf.capacity || '-'}</td>
+                    <td><span class="badge badge-success">Active</span></td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadTerminalsTable() {
+            const terminalsSnapshot = await getDocs(collection(db, 'terminals'));
+            const cafMap = new Map(cachedCafs.map(caf => [caf.id, caf.name]));
+            const tbody = document.getElementById('terminalsTable');
+
+            if (terminalsSnapshot.empty) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">💻</div><div class="empty-state-title">No terminals configured</div><p>Add a new terminal to get started</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = terminalsSnapshot.docs.map(docSnap => {
+                const terminal = docSnap.data();
+                return `
+                    <tr>
+                        <td>${terminal.terminalId || '-'}</td>
+                        <td>${cafMap.get(terminal.cafId) || '-'}</td>
+                        <td>${terminal.location || '-'}</td>
+                        <td><span class="badge badge-info">Active</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function loadMealLogsTable() {
+            const mealLogsSnapshot = await getDocs(query(collection(db, 'mealLogs'), orderBy('timestamp', 'desc'), limit(50)));
+            const studentsSnapshot = await getDocs(collection(db, 'students'));
+            const cafsSnapshot = await getDocs(collection(db, 'cafs'));
+
+            const students = new Map(studentsSnapshot.docs.map(docSnap => [docSnap.id, docSnap.data()]));
+            const cafs = new Map(cafsSnapshot.docs.map(docSnap => [docSnap.id, docSnap.data()]));
+            const tbody = document.getElementById('logsTable');
+
+            if (mealLogsSnapshot.empty) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No meal logs</div><p>Meal transactions will appear here</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = mealLogsSnapshot.docs.map(docSnap => {
+                const log = docSnap.data();
+                const student = students.get(log.studentId) || {};
+                const caf = cafs.get(log.cafId) || {};
+                const timestamp = log.timestamp?.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+                return `
+                    <tr>
+                        <td>${student.matricNumber || log.matricNumber || '-'}</td>
+                        <td>${student.fullName || '-'}</td>
+                        <td>${caf.name || '-'}</td>
+                        <td>${timestamp.toLocaleString()}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        async function loadRfidRequestsTable() {
+            const rfidSnapshot = await getDocs(query(collection(db, 'rfidRequests'), orderBy('createdAt', 'desc')));
+            const studentsSnapshot = await getDocs(collection(db, 'students'));
+            const students = new Map(studentsSnapshot.docs.map(docSnap => [docSnap.id, docSnap.data()]));
+            const tbody = document.getElementById('rfidTable');
+
+            if (rfidSnapshot.empty) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">🏷️</div><div class="empty-state-title">No RFID requests</div><p>RFID requests will appear here</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = rfidSnapshot.docs.map(docSnap => {
+                const request = docSnap.data();
+                const student = students.get(request.studentId) || {};
+                const timestamp = request.createdAt?.toDate ? request.createdAt.toDate() : new Date(request.createdAt);
+                return `
+                    <tr>
+                        <td>${student.matricNumber || '-'}</td>
+                        <td>${student.fullName || '-'}</td>
+                        <td><span class="badge badge-warning">${request.status || 'Pending'}</span></td>
+                        <td>${timestamp ? timestamp.toLocaleDateString() : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function loadMealSessionsTable() {
+            const sessionsSnapshot = await getDocs(query(collection(db, 'mealSessions'), orderBy('startTime', 'asc')));
+            const tbody = document.getElementById('sessionsTable');
+
+            if (sessionsSnapshot.empty) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">⏰</div><div class="empty-state-title">No meal sessions</div><p>Meal sessions will appear here</p></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sessionsSnapshot.docs.map(docSnap => {
+                const session = docSnap.data();
+                return `
+                    <tr>
+                        <td>${session.name || '-'}</td>
+                        <td>${session.startTime || '-'}</td>
+                        <td>${session.endTime || '-'}</td>
+                        <td><span class="badge badge-info">${session.status || 'Active'}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.openCAFModal = function() {
             document.getElementById('cafModal').classList.add('active');
             document.getElementById('cafForm').reset();
-        }
+        };
 
-        function closeCAFModal() {
+        window.closeCAFModal = function() {
             document.getElementById('cafModal').classList.remove('active');
-        }
+        };
 
-        function handleAddCAF(e) {
+        window.handleAddCAF = async function(e) {
             e.preventDefault();
 
             const caf = {
-                id: 'CAF-' + Date.now(),
                 name: document.getElementById('cafName').value,
                 building: document.getElementById('cafBuilding').value,
-                capacity: document.getElementById('cafCapacity').value
+                capacity: parseInt(document.getElementById('cafCapacity').value, 10),
+                createdAt: serverTimestamp()
             };
 
-            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
-            cafs.push(caf);
-            localStorage.setItem('cafs', JSON.stringify(cafs));
-
+            await addDoc(collection(db, 'cafs'), caf);
             closeCAFModal();
-            updateDashboard();
+            await updateDashboard();
             loadCafsTable();
-        }
+        };
 
-        function openTerminalModal() {
-            const cafs = JSON.parse(localStorage.getItem('cafs')) || [];
+        window.openTerminalModal = async function() {
+            await loadCafsTable();
             const select = document.getElementById('terminalCAF');
             select.innerHTML = '<option value="">-- Select CAF --</option>';
-            cafs.forEach(caf => {
+            cachedCafs.forEach(caf => {
                 const option = document.createElement('option');
                 option.value = caf.id;
                 option.textContent = caf.name;
@@ -955,34 +1061,51 @@
 
             document.getElementById('terminalModal').classList.add('active');
             document.getElementById('terminalForm').reset();
-        }
+        };
 
-        function closeTerminalModal() {
+        window.closeTerminalModal = function() {
             document.getElementById('terminalModal').classList.remove('active');
-        }
+        };
 
-        function handleAddTerminal(e) {
+        window.handleAddTerminal = async function(e) {
             e.preventDefault();
 
             const terminal = {
-                id: document.getElementById('terminalId').value,
+                terminalId: document.getElementById('terminalId').value,
                 cafId: document.getElementById('terminalCAF').value,
-                location: document.getElementById('terminalLocation').value
+                location: document.getElementById('terminalLocation').value,
+                createdAt: serverTimestamp()
             };
 
-            const terminals = JSON.parse(localStorage.getItem('terminals')) || [];
-            terminals.push(terminal);
-            localStorage.setItem('terminals', JSON.stringify(terminals));
-
+            await addDoc(collection(db, 'terminals'), terminal);
             closeTerminalModal();
-            updateDashboard();
-        }
+            await updateDashboard();
+            loadTerminalsTable();
+        };
 
-        function handleLogout() {
-            sessionStorage.removeItem('adminAuthenticated');
-            sessionStorage.removeItem('adminUsername');
+        window.openBarcodeModal = function(matricNumber) {
+            if (!matricNumber) {
+                return;
+            }
+            JsBarcode("#adminBarcode", matricNumber, {
+                format: "CODE128",
+                lineColor: "#111827",
+                width: 2,
+                height: 70,
+                displayValue: false
+            });
+            document.getElementById('barcodeLabel').textContent = `Matric: ${matricNumber}`;
+            document.getElementById('barcodeModal').classList.add('active');
+        };
+
+        window.closeBarcodeModal = function() {
+            document.getElementById('barcodeModal').classList.remove('active');
+        };
+
+        window.handleLogout = async function() {
+            await signOut(auth);
             window.location.href = 'index.html';
-        }
+        };
     </script>
 </body>
 </html>
