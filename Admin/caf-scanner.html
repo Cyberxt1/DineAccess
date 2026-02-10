@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAF Scanner - University CAF System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at 20% 20%, #fef3c7, transparent 55%),
+                        radial-gradient(circle at 80% 0%, #bae6fd, transparent 45%),
+                        linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .scanner-card {
+            background: rgba(15, 23, 42, 0.75);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 580px;
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(12px);
+        }
+
+        .scanner-card h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .scanner-card p {
+            color: #cbd5f5;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            font-size: 14px;
+            background: rgba(15, 23, 42, 0.4);
+            color: #f8fafc;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .status {
+            margin-top: 16px;
+            font-size: 14px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            display: block;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fecaca;
+            display: block;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            color: #bae6fd;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-card">
+        <a class="back-link" href="admin-inner-landing.html">← Back to Admin</a>
+        <h1>CAF Scanner</h1>
+        <p>Scan a student barcode (matric number) to log a meal.</p>
+
+        <form id="scanForm">
+            <div class="form-group">
+                <label for="matricInput">Matric / Barcode</label>
+                <input type="text" id="matricInput" placeholder="Enter or scan matric number" required>
+            </div>
+            <div class="form-group">
+                <label for="cafSelect">CAF Location</label>
+                <select id="cafSelect" required>
+                    <option value="">Select CAF</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sessionSelect">Meal Session</label>
+                <select id="sessionSelect" required>
+                    <option value="">Select Session</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="terminalSelect">Terminal (Optional)</label>
+                <select id="terminalSelect">
+                    <option value="">Select Terminal</option>
+                </select>
+            </div>
+            <button class="btn" type="submit">Log Meal</button>
+        </form>
+
+        <div id="statusBox" class="status"></div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            addDoc,
+            collection,
+            doc,
+            getDoc,
+            getDocs,
+            query,
+            where,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const cafSelect = document.getElementById('cafSelect');
+        const sessionSelect = document.getElementById('sessionSelect');
+        const terminalSelect = document.getElementById('terminalSelect');
+        const statusBox = document.getElementById('statusBox');
+        const offlineQueueKey = 'caf_offline_queue';
+
+        function showStatus(message, type) {
+            statusBox.textContent = message;
+            statusBox.className = `status ${type}`;
+        }
+
+        function getQueue() {
+            try {
+                return JSON.parse(localStorage.getItem(offlineQueueKey)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveQueue(queue) {
+            localStorage.setItem(offlineQueueKey, JSON.stringify(queue));
+        }
+
+        async function syncQueue() {
+            const queue = getQueue();
+            if (queue.length === 0 || !navigator.onLine) {
+                return;
+            }
+
+            const remaining = [];
+            for (const entry of queue) {
+                try {
+                    const mealLog = {
+                        ...entry.mealLog,
+                        timestamp: entry.mealLog.timestamp ? new Date(entry.mealLog.timestamp) : serverTimestamp()
+                    };
+                    const attendance = {
+                        ...entry.attendance,
+                        timestamp: entry.attendance.timestamp ? new Date(entry.attendance.timestamp) : serverTimestamp()
+                    };
+                    await addDoc(collection(db, 'mealLogs'), mealLog);
+                    await addDoc(collection(db, 'students', entry.studentId, 'attendance'), attendance);
+                } catch (error) {
+                    remaining.push(entry);
+                }
+            }
+            saveQueue(remaining);
+            if (remaining.length === 0) {
+                showStatus('Offline logs synced successfully.', 'success');
+            }
+        }
+
+        async function loadOptions() {
+            const cafsSnapshot = await getDocs(collection(db, 'cafs'));
+            cafSelect.innerHTML = '<option value="">Select CAF</option>';
+            cafsSnapshot.forEach(docSnap => {
+                const caf = docSnap.data();
+                const option = document.createElement('option');
+                option.value = docSnap.id;
+                option.textContent = caf.name || 'CAF';
+                cafSelect.appendChild(option);
+            });
+
+            const sessionsSnapshot = await getDocs(collection(db, 'mealSessions'));
+            sessionSelect.innerHTML = '<option value="">Select Session</option>';
+            sessionsSnapshot.forEach(docSnap => {
+                const session = docSnap.data();
+                const option = document.createElement('option');
+                option.value = docSnap.id;
+                option.textContent = `${session.name || 'Session'} (${session.startTime || '--'} - ${session.endTime || '--'})`;
+                sessionSelect.appendChild(option);
+            });
+
+            const terminalsSnapshot = await getDocs(collection(db, 'terminals'));
+            terminalSelect.innerHTML = '<option value="">Select Terminal</option>';
+            terminalsSnapshot.forEach(docSnap => {
+                const terminal = docSnap.data();
+                const option = document.createElement('option');
+                option.value = docSnap.id;
+                option.textContent = terminal.terminalId || 'Terminal';
+                terminalSelect.appendChild(option);
+            });
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'admin_login.html';
+                return;
+            }
+
+            const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+            if (!adminSnap.exists()) {
+                await signOut(auth);
+                window.location.href = 'admin_login.html';
+                return;
+            }
+
+            loadOptions();
+            syncQueue();
+        });
+
+        window.addEventListener('online', () => {
+            syncQueue();
+        });
+
+        document.getElementById('scanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const matricNumber = document.getElementById('matricInput').value.trim();
+            const cafId = cafSelect.value;
+            const sessionId = sessionSelect.value;
+            const terminalId = terminalSelect.value || null;
+
+            if (!matricNumber || !cafId || !sessionId) {
+                showStatus('Please fill all required fields.', 'error');
+                return;
+            }
+
+            const matricKey = encodeURIComponent(matricNumber);
+            const matricSnap = await getDoc(doc(db, 'matricIndex', matricKey));
+            if (!matricSnap.exists()) {
+                showStatus('Student not found. Check the matric number.', 'error');
+                return;
+            }
+
+            const studentId = matricSnap.data().uid;
+            const studentSnap = await getDoc(doc(db, 'students', studentId));
+            if (!studentSnap.exists()) {
+                showStatus('Student record missing.', 'error');
+                return;
+            }
+
+            const student = studentSnap.data();
+            const todayKey = new Date().toISOString().slice(0, 10);
+
+            const duplicateQuery = query(
+                collection(db, 'mealLogs'),
+                where('studentId', '==', studentId),
+                where('dateKey', '==', todayKey)
+            );
+            const duplicateSnap = await getDocs(duplicateQuery);
+            const alreadyLogged = duplicateSnap.docs.some(docSnap => docSnap.data().mealSessionId === sessionId);
+            if (alreadyLogged) {
+                showStatus('Meal already logged for this session today.', 'error');
+                return;
+            }
+
+            const mealLog = {
+                studentId,
+                matricNumber: student.matricNumber,
+                fullName: student.fullName,
+                cafId,
+                mealSessionId: sessionId,
+                terminalId,
+                dateKey: todayKey,
+                timestamp: serverTimestamp()
+            };
+
+            const attendance = {
+                cafId,
+                mealSessionId: sessionId,
+                terminalId,
+                mealType: 'Standard',
+                dateKey: todayKey,
+                timestamp: serverTimestamp()
+            };
+
+            try {
+                if (!navigator.onLine) {
+                    throw new Error('offline');
+                }
+                await addDoc(collection(db, 'mealLogs'), mealLog);
+                await addDoc(collection(db, 'students', studentId, 'attendance'), attendance);
+                document.getElementById('matricInput').value = '';
+                showStatus('Meal logged successfully.', 'success');
+            } catch (error) {
+                const offlineTimestamp = new Date().toISOString();
+                const queue = getQueue();
+                queue.push({
+                    studentId,
+                    mealLog: { ...mealLog, timestamp: offlineTimestamp },
+                    attendance: { ...attendance, timestamp: offlineTimestamp }
+                });
+                saveQueue(queue);
+                document.getElementById('matricInput').value = '';
+                showStatus('Offline mode: log queued for sync.', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

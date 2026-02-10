@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - University CAF System</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --color-primary: #4299e1;
-            --color-text: #2d3748;
-            --color-text-secondary: #718096;
-            --color-bg: #ffffff;
-            --color-bg-secondary: #f7fafc;
-            --color-border: #e2e8f0;
-            --color-success: #38a169;
-            --color-error: #e53e3e;
-            --color-warning: #ed8936;
+            --color-primary: #38bdf8;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #94a3b8;
+            --color-bg: rgba(15, 23, 42, 0.9);
+            --color-bg-secondary: #0f172a;
+            --color-border: rgba(148, 163, 184, 0.2);
+            --color-success: #22c55e;
+            --color-error: #ef4444;
+            --color-warning: #f59e0b;
             --sidebar-width: 240px;
         }
 
@@ -27,8 +28,10 @@
 
         html, body {
             height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--color-bg-secondary);
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at 15% 15%, rgba(254, 243, 199, 0.2), transparent 55%),
+                        radial-gradient(circle at 85% 10%, rgba(186, 230, 253, 0.2), transparent 45%),
+                        linear-gradient(135deg, #0f172a, #1e293b);
             color: var(--color-text);
         }
 
@@ -39,7 +42,7 @@
 
         .sidebar {
             width: var(--sidebar-width);
-            background-color: var(--color-bg-secondary);
+            background-color: rgba(15, 23, 42, 0.95);
             border-right: 1px solid var(--color-border);
             position: fixed;
             left: 0;
@@ -100,7 +103,7 @@
         }
 
         .header {
-            background-color: var(--color-bg);
+            background-color: rgba(15, 23, 42, 0.92);
             border-bottom: 1px solid var(--color-border);
             padding: 16px 24px;
             display: flex;
@@ -193,7 +196,7 @@
         }
 
         .card {
-            background-color: var(--color-bg);
+            background-color: rgba(15, 23, 42, 0.85);
             border: 1px solid var(--color-border);
             border-radius: 30px;
             padding: 20px;
@@ -230,7 +233,7 @@
         }
 
         .table-container {
-            background-color: var(--color-bg);
+            background-color: rgba(15, 23, 42, 0.85);
             border: 1px solid var(--color-border);
             border-radius: 8px;
             overflow: hidden;
@@ -243,7 +246,7 @@
         }
 
         thead {
-            background-color: var(--color-bg-secondary);
+            background-color: rgba(30, 41, 59, 0.9);
             border-bottom: 1px solid var(--color-border);
         }
 
@@ -294,6 +297,68 @@
         .badge-info {
             background-color: #bee3f8;
             color: #2c5282;
+        }
+
+        .badge-neutral {
+            background-color: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .badge-approved {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-rejected {
+            background-color: #fed7d7;
+            color: #742a2a;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar input {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .analysis-card {
+            background-color: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .analysis-card h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .chart-card {
+            background-color: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .chart-card canvas {
+            width: 100% !important;
+            height: 260px !important;
         }
 
         .form-group {
@@ -539,10 +604,74 @@
                         <div class="stat-value" id="activeTerminals">0</div>
                     </div>
                 </div>
+
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h3>Meals (Last 7 Days)</h3>
+                        <div id="mealTrendSummary" style="font-size: 24px; font-weight: 700;">0</div>
+                        <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">Total meals logged</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>Top CAFs</h3>
+                        <div id="topCafsList" style="font-size: 13px; color: var(--color-text-secondary);">No data yet</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>Top Sessions</h3>
+                        <div id="topSessionsList" style="font-size: 13px; color: var(--color-text-secondary);">No data yet</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>Feedback Score</h3>
+                        <div id="feedbackScore" style="font-size: 24px; font-weight: 700;">0.0</div>
+                        <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">Average rating</div>
+                    </div>
+                </div>
+
+                <div class="analysis-card" style="margin-top: 16px;">
+                    <h3>Recent Feedback</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Rating</th>
+                                    <th>Comment</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feedbackTable">
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">💬</div>
+                                            <div class="empty-state-title">No feedback yet</div>
+                                            <p>Student feedback will appear here</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="analysis-grid" style="margin-top: 16px;">
+                    <div class="chart-card">
+                        <h3 style="margin-bottom: 12px;">Weekly Meal Breakdown</h3>
+                        <canvas id="weeklyMealsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 style="margin-bottom: 12px;">Top CAFs (Last 7 Days)</h3>
+                        <canvas id="cafShareChart"></canvas>
+                    </div>
+                </div>
             </div>
             <div id="students" class="page">
                 <div class="page-title">Students</div>
                 <div class="page-subtitle">Manage student records</div>
+
+                <div class="toolbar">
+                    <input type="text" id="studentSearch" placeholder="Search by matric, name, department, or level">
+                    <button class="btn" onclick="exportStudents()">Export CSV</button>
+                </div>
 
                 <div class="table-container">
                     <table>
@@ -582,11 +711,12 @@
                                 <th>Student Name</th>
                                 <th>Status</th>
                                 <th>Date Requested</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="rfidTable">
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">🏷️</div>
                                         <div class="empty-state-title">No RFID requests</div>
@@ -667,8 +797,13 @@
                 </div>
             </div>
             <div id="meal-sessions" class="page">
-                <div class="page-title">Meal Sessions</div>
-                <div class="page-subtitle">Manage meal service periods</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <div class="page-title">Meal Sessions</div>
+                        <div class="page-subtitle">Manage meal service periods</div>
+                    </div>
+                    <button class="btn" onclick="openMealSessionModal()">Add Meal Session</button>
+                </div>
 
                 <div class="table-container">
                     <table>
@@ -678,11 +813,12 @@
                                 <th>Start Time</th>
                                 <th>End Time</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="sessionsTable">
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">⏰</div>
                                         <div class="empty-state-title">No meal sessions</div>
@@ -786,6 +922,10 @@
                     <label for="terminalLocation">Location</label>
                     <input type="text" id="terminalLocation" required>
                 </div>
+                <div class="form-group">
+                    <label for="terminalAccessKey">Access Key (Optional)</label>
+                    <input type="text" id="terminalAccessKey" placeholder="Set a key for terminal access">
+                </div>
                 <div style="display: flex; gap: 12px;">
                     <button type="submit" class="btn">Add Terminal</button>
                     <button type="button" class="btn btn-secondary" onclick="closeTerminalModal()">Cancel</button>
@@ -794,6 +934,32 @@
         </div>
     </div>
 
+    <div id="mealSessionModal" class="modal">
+        <div class="modal-content" style="background-color: #a7aba9;">
+            <button class="modal-close" onclick="closeMealSessionModal()">×</button>
+            <div class="modal-title" id="mealSessionModalTitle">Add Meal Session</div>
+
+            <form id="mealSessionForm" onsubmit="handleAddMealSession(event)">
+                <input type="hidden" id="sessionId">
+                <div class="form-group">
+                    <label for="sessionName">Session Name</label>
+                    <input type="text" id="sessionName" required>
+                </div>
+                <div class="form-group">
+                    <label for="sessionStart">Start Time</label>
+                    <input type="time" id="sessionStart" required>
+                </div>
+                <div class="form-group">
+                    <label for="sessionEnd">End Time</label>
+                    <input type="time" id="sessionEnd" required>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn">Add Session</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeMealSessionModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div id="barcodeModal" class="modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeBarcodeModal()">×</button>
@@ -813,14 +979,26 @@
             doc,
             getDoc,
             getDocs,
+            onSnapshot,
             orderBy,
             query,
             where,
             serverTimestamp,
+            updateDoc,
             limit
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         let cachedCafs = [];
+        let studentsData = [];
+        let terminalsData = [];
+        let mealLogsData = [];
+        let rfidRequestsData = [];
+        let mealSessionsData = [];
+        let feedbackData = [];
+        let studentSearchTerm = '';
+        let unsubscribers = [];
+        let weeklyMealsChart = null;
+        let cafShareChart = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -837,7 +1015,8 @@
             }
 
             document.getElementById('adminName').textContent = adminSnap.data()?.name || user.email || 'System Admin';
-            await updateDashboard();
+            startRealtimeListeners();
+            wireStudentSearch();
         });
 
         window.navigateTo = function(event, page) {
@@ -849,70 +1028,74 @@
             event.target.classList.add('active');
 
             if (page === 'students') {
-                loadStudentsTable();
+                renderStudentsTable();
             } else if (page === 'cafs') {
-                loadCafsTable();
+                renderCafsTable();
             } else if (page === 'terminals') {
-                loadTerminalsTable();
+                renderTerminalsTable();
             } else if (page === 'meal-logs') {
-                loadMealLogsTable();
+                renderMealLogsTable();
             } else if (page === 'rfid-requests') {
-                loadRfidRequestsTable();
+                renderRfidRequestsTable();
             } else if (page === 'meal-sessions') {
-                loadMealSessionsTable();
+                renderMealSessionsTable();
             }
         };
 
-        async function updateDashboard() {
-            const studentsSnapshot = await getDocs(collection(db, 'students'));
-            const cafsSnapshot = await getDocs(collection(db, 'cafs'));
-            const terminalsSnapshot = await getDocs(collection(db, 'terminals'));
-
-            const startOfDay = new Date();
-            startOfDay.setHours(0, 0, 0, 0);
-            const mealLogsQuery = query(collection(db, 'mealLogs'), where('timestamp', '>=', startOfDay));
-            const mealLogsSnapshot = await getDocs(mealLogsQuery);
-
-            document.getElementById('totalStudents').textContent = studentsSnapshot.size;
-            document.getElementById('mealToday').textContent = mealLogsSnapshot.size;
-            document.getElementById('activeCafs').textContent = cafsSnapshot.size;
-            document.getElementById('activeTerminals').textContent = terminalsSnapshot.size;
+        function parseTimestamp(value) {
+            if (!value) {
+                return null;
+            }
+            if (value.toDate) {
+                return value.toDate();
+            }
+            return new Date(value);
         }
 
-        async function loadStudentsTable() {
-            const studentsSnapshot = await getDocs(query(collection(db, 'students'), orderBy('createdAt', 'desc')));
-            const tbody = document.getElementById('studentsTable');
+        function updateDashboard() {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const mealToday = mealLogsData.filter(log => {
+                const ts = parseTimestamp(log.timestamp);
+                return ts && ts >= startOfDay;
+            });
 
-            if (studentsSnapshot.empty) {
+            document.getElementById('totalStudents').textContent = studentsData.length;
+            document.getElementById('mealToday').textContent = mealToday.length;
+            document.getElementById('activeCafs').textContent = cachedCafs.length;
+            document.getElementById('activeTerminals').textContent = terminalsData.length;
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('studentsTable');
+            const term = studentSearchTerm.toLowerCase();
+            const filtered = studentsData.filter(student => {
+                const hay = `${student.matricNumber || ''} ${student.fullName || ''} ${student.department || ''} ${student.level || ''}`.toLowerCase();
+                return hay.includes(term);
+            });
+
+            if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-title">No students yet</div><p>Students will appear here once they register</p></div></td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = studentsSnapshot.docs.map(docSnap => {
-                const student = docSnap.data();
-                return `
-                    <tr>
-                        <td>${student.matricNumber || '-'}</td>
-                        <td>${student.fullName || '-'}</td>
-                        <td>${student.department || '-'}</td>
-                        <td>${student.level || '-'}</td>
-                        <td><button class="btn btn-small" onclick="openBarcodeModal('${student.matricNumber || ''}')">Show</button></td>
-                    </tr>
-                `;
-            }).join('');
+            tbody.innerHTML = filtered.map(student => `
+                <tr>
+                    <td>${student.matricNumber || '-'}</td>
+                    <td>${student.fullName || '-'}</td>
+                    <td>${student.department || '-'}</td>
+                    <td>${student.level || '-'}</td>
+                    <td><button class="btn btn-small" onclick="openBarcodeModal('${student.matricNumber || ''}')">Show</button></td>
+                </tr>
+            `).join('');
         }
 
-        async function loadCafsTable() {
-            const cafsSnapshot = await getDocs(collection(db, 'cafs'));
+        function renderCafsTable() {
             const tbody = document.getElementById('cafsTable');
-
-            cachedCafs = cafsSnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-
             if (cachedCafs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">🍽️</div><div class="empty-state-title">No CAFs configured</div><p>Add a new CAF to get started</p></div></td></tr>`;
                 return;
             }
-
             tbody.innerHTML = cachedCafs.map(caf => `
                 <tr>
                     <td>${caf.name || '-'}</td>
@@ -923,105 +1106,405 @@
             `).join('');
         }
 
-        async function loadTerminalsTable() {
-            const terminalsSnapshot = await getDocs(collection(db, 'terminals'));
+        function renderTerminalsTable() {
             const cafMap = new Map(cachedCafs.map(caf => [caf.id, caf.name]));
             const tbody = document.getElementById('terminalsTable');
-
-            if (terminalsSnapshot.empty) {
+            if (terminalsData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">💻</div><div class="empty-state-title">No terminals configured</div><p>Add a new terminal to get started</p></div></td></tr>`;
                 return;
             }
-
-            tbody.innerHTML = terminalsSnapshot.docs.map(docSnap => {
-                const terminal = docSnap.data();
-                return `
-                    <tr>
-                        <td>${terminal.terminalId || '-'}</td>
-                        <td>${cafMap.get(terminal.cafId) || '-'}</td>
-                        <td>${terminal.location || '-'}</td>
-                        <td><span class="badge badge-info">Active</span></td>
-                    </tr>
-                `;
-            }).join('');
+            tbody.innerHTML = terminalsData.map(terminal => `
+                <tr>
+                    <td>${terminal.terminalId || '-'}</td>
+                    <td>${cafMap.get(terminal.cafId) || '-'}</td>
+                    <td>${terminal.location || '-'}</td>
+                    <td><span class="badge badge-info">Active</span></td>
+                </tr>
+            `).join('');
         }
 
-        async function loadMealLogsTable() {
-            const mealLogsSnapshot = await getDocs(query(collection(db, 'mealLogs'), orderBy('timestamp', 'desc'), limit(50)));
-            const studentsSnapshot = await getDocs(collection(db, 'students'));
-            const cafsSnapshot = await getDocs(collection(db, 'cafs'));
-
-            const students = new Map(studentsSnapshot.docs.map(docSnap => [docSnap.id, docSnap.data()]));
-            const cafs = new Map(cafsSnapshot.docs.map(docSnap => [docSnap.id, docSnap.data()]));
+        function renderMealLogsTable() {
+            const studentsMap = new Map(studentsData.map(student => [student.id, student]));
+            const cafsMap = new Map(cachedCafs.map(caf => [caf.id, caf]));
             const tbody = document.getElementById('logsTable');
 
-            if (mealLogsSnapshot.empty) {
+            if (mealLogsData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No meal logs</div><p>Meal transactions will appear here</p></div></td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = mealLogsSnapshot.docs.map(docSnap => {
-                const log = docSnap.data();
-                const student = students.get(log.studentId) || {};
-                const caf = cafs.get(log.cafId) || {};
-                const timestamp = log.timestamp?.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+            const sorted = [...mealLogsData].sort((a, b) => {
+                const aTime = parseTimestamp(a.timestamp) || new Date(0);
+                const bTime = parseTimestamp(b.timestamp) || new Date(0);
+                return bTime - aTime;
+            }).slice(0, 50);
+
+            tbody.innerHTML = sorted.map(log => {
+                const student = studentsMap.get(log.studentId) || {};
+                const caf = cafsMap.get(log.cafId) || {};
+                const timestamp = parseTimestamp(log.timestamp);
                 return `
                     <tr>
                         <td>${student.matricNumber || log.matricNumber || '-'}</td>
                         <td>${student.fullName || '-'}</td>
                         <td>${caf.name || '-'}</td>
-                        <td>${timestamp.toLocaleString()}</td>
+                        <td>${timestamp ? timestamp.toLocaleString() : '-'}</td>
                     </tr>
                 `;
             }).join('');
         }
-        async function loadRfidRequestsTable() {
-            const rfidSnapshot = await getDocs(query(collection(db, 'rfidRequests'), orderBy('createdAt', 'desc')));
-            const studentsSnapshot = await getDocs(collection(db, 'students'));
-            const students = new Map(studentsSnapshot.docs.map(docSnap => [docSnap.id, docSnap.data()]));
+
+        function renderRfidRequestsTable() {
+            const studentsMap = new Map(studentsData.map(student => [student.id, student]));
             const tbody = document.getElementById('rfidTable');
 
-            if (rfidSnapshot.empty) {
-                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">🏷️</div><div class="empty-state-title">No RFID requests</div><p>RFID requests will appear here</p></div></td></tr>`;
+            if (rfidRequestsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">🏷️</div><div class="empty-state-title">No RFID requests</div><p>RFID requests will appear here</p></div></td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = rfidSnapshot.docs.map(docSnap => {
-                const request = docSnap.data();
-                const student = students.get(request.studentId) || {};
-                const timestamp = request.createdAt?.toDate ? request.createdAt.toDate() : new Date(request.createdAt);
+            const sorted = [...rfidRequestsData].sort((a, b) => {
+                const aTime = parseTimestamp(a.createdAt) || new Date(0);
+                const bTime = parseTimestamp(b.createdAt) || new Date(0);
+                return bTime - aTime;
+            });
+
+            tbody.innerHTML = sorted.map(request => {
+                const student = studentsMap.get(request.studentId) || {};
+                const timestamp = parseTimestamp(request.createdAt);
+                const status = request.status || 'Pending';
+                const statusLower = status.toLowerCase();
+                const badgeClass = statusLower === 'approved'
+                    ? 'badge-approved'
+                    : statusLower === 'rejected'
+                        ? 'badge-rejected'
+                        : 'badge-warning';
+                const isPending = statusLower === 'pending';
+                const actionButtons = isPending
+                    ? `<button class="btn btn-small" onclick="handleUpdateRfid('${request.id}', '${request.studentId}', 'approved')">Approve</button>
+                       <button class="btn btn-secondary btn-small" onclick="handleUpdateRfid('${request.id}', '${request.studentId}', 'rejected')">Reject</button>`
+                    : '<span>-</span>';
                 return `
                     <tr>
-                        <td>${student.matricNumber || '-'}</td>
-                        <td>${student.fullName || '-'}</td>
-                        <td><span class="badge badge-warning">${request.status || 'Pending'}</span></td>
+                        <td>${request.matricNumber || student.matricNumber || '-'}</td>
+                        <td>${request.fullName || student.fullName || '-'}</td>
+                        <td><span class="badge ${badgeClass}">${status}</span></td>
+                        <td>${timestamp ? timestamp.toLocaleDateString() : '-'}</td>
+                        <td>${actionButtons}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderMealSessionsTable() {
+            const tbody = document.getElementById('sessionsTable');
+            if (mealSessionsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">⏰</div><div class="empty-state-title">No meal sessions</div><p>Meal sessions will appear here</p></div></td></tr>`;
+                return;
+            }
+
+            const sorted = [...mealSessionsData].sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+            tbody.innerHTML = sorted.map(session => {
+                const status = session.status || 'Active';
+                const badgeClass = status === 'Active' ? 'badge-info' : 'badge-neutral';
+                return `
+                    <tr>
+                        <td>${session.name || '-'}</td>
+                        <td>${session.startTime || '-'}</td>
+                        <td>${session.endTime || '-'}</td>
+                        <td><span class="badge ${badgeClass}">${status}</span></td>
+                        <td>
+                            <button class="btn btn-small" onclick="editMealSession('${session.id}')">Edit</button>
+                            <button class="btn btn-secondary btn-small" onclick="deleteMealSession('${session.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderFeedbackTable() {
+            const tbody = document.getElementById('feedbackTable');
+            if (feedbackData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">💬</div><div class="empty-state-title">No feedback yet</div><p>Student feedback will appear here</p></div></td></tr>`;
+                return;
+            }
+
+            const sorted = [...feedbackData].sort((a, b) => {
+                const aTime = parseTimestamp(a.createdAt) || new Date(0);
+                const bTime = parseTimestamp(b.createdAt) || new Date(0);
+                return bTime - aTime;
+            }).slice(0, 8);
+
+            const studentsMap = new Map(studentsData.map(student => [student.id, student]));
+            tbody.innerHTML = sorted.map(entry => {
+                const student = studentsMap.get(entry.studentId) || {};
+                const timestamp = parseTimestamp(entry.createdAt);
+                return `
+                    <tr>
+                        <td>${student.fullName || entry.studentName || '-'}</td>
+                        <td>${entry.rating || '-'}</td>
+                        <td>${entry.comment || '-'}</td>
                         <td>${timestamp ? timestamp.toLocaleDateString() : '-'}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        async function loadMealSessionsTable() {
-            const sessionsSnapshot = await getDocs(query(collection(db, 'mealSessions'), orderBy('startTime', 'asc')));
-            const tbody = document.getElementById('sessionsTable');
+        function renderAnalytics() {
+            const now = new Date();
+            const start = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
+            start.setHours(0, 0, 0, 0);
+            const last7 = mealLogsData.filter(log => {
+                const ts = parseTimestamp(log.timestamp);
+                return ts && ts >= start;
+            });
+            document.getElementById('mealTrendSummary').textContent = last7.length;
 
-            if (sessionsSnapshot.empty) {
-                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">⏰</div><div class="empty-state-title">No meal sessions</div><p>Meal sessions will appear here</p></div></td></tr>`;
-                return;
+            const cafMap = new Map(cachedCafs.map(caf => [caf.id, caf.name || 'CAF']));
+            const cafCounts = {};
+            last7.forEach(log => {
+                cafCounts[log.cafId] = (cafCounts[log.cafId] || 0) + 1;
+            });
+            const topCafs = Object.entries(cafCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([cafId, count]) => `${cafMap.get(cafId) || 'CAF'}: ${count}`)
+                .join('<br>');
+            document.getElementById('topCafsList').innerHTML = topCafs || 'No data yet';
+
+            const sessionMap = new Map(mealSessionsData.map(session => [session.id, session.name || 'Session']));
+            const sessionCounts = {};
+            last7.forEach(log => {
+                sessionCounts[log.mealSessionId] = (sessionCounts[log.mealSessionId] || 0) + 1;
+            });
+            const topSessions = Object.entries(sessionCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([sessionId, count]) => `${sessionMap.get(sessionId) || 'Session'}: ${count}`)
+                .join('<br>');
+            document.getElementById('topSessionsList').innerHTML = topSessions || 'No data yet';
+
+            if (feedbackData.length === 0) {
+                document.getElementById('feedbackScore').textContent = '0.0';
+            } else {
+                const avg = feedbackData.reduce((sum, entry) => sum + (entry.rating || 0), 0) / feedbackData.length;
+                document.getElementById('feedbackScore').textContent = avg.toFixed(1);
             }
 
-            tbody.innerHTML = sessionsSnapshot.docs.map(docSnap => {
-                const session = docSnap.data();
-                return `
-                    <tr>
-                        <td>${session.name || '-'}</td>
-                        <td>${session.startTime || '-'}</td>
-                        <td>${session.endTime || '-'}</td>
-                        <td><span class="badge badge-info">${session.status || 'Active'}</span></td>
-                    </tr>
-                `;
-            }).join('');
+            renderCharts(last7);
         }
+
+        function renderCharts(last7Logs) {
+            const labels = [];
+            const data = [];
+            const dayMap = {};
+            for (let i = 6; i >= 0; i -= 1) {
+                const day = new Date();
+                day.setDate(day.getDate() - i);
+                const key = day.toISOString().slice(0, 10);
+                labels.push(day.toLocaleDateString(undefined, { weekday: 'short' }));
+                dayMap[key] = 0;
+            }
+
+            last7Logs.forEach(log => {
+                const ts = parseTimestamp(log.timestamp);
+                if (!ts) {
+                    return;
+                }
+                const key = ts.toISOString().slice(0, 10);
+                if (key in dayMap) {
+                    dayMap[key] += 1;
+                }
+            });
+
+            Object.keys(dayMap).forEach(key => data.push(dayMap[key]));
+
+            const cafMap = new Map(cachedCafs.map(caf => [caf.id, caf.name || 'CAF']));
+            const cafCounts = {};
+            last7Logs.forEach(log => {
+                if (!log.cafId) {
+                    return;
+                }
+                cafCounts[log.cafId] = (cafCounts[log.cafId] || 0) + 1;
+            });
+            const cafEntries = Object.entries(cafCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const cafLabels = cafEntries.map(([cafId]) => cafMap.get(cafId) || 'CAF');
+            const cafValues = cafEntries.map(([, count]) => count);
+
+            if (!weeklyMealsChart) {
+                const ctx = document.getElementById('weeklyMealsChart');
+                if (ctx) {
+                    weeklyMealsChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: 'Meals',
+                                data,
+                                borderColor: '#2563eb',
+                                backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            } else {
+                weeklyMealsChart.data.labels = labels;
+                weeklyMealsChart.data.datasets[0].data = data;
+                weeklyMealsChart.update();
+            }
+
+            if (!cafShareChart) {
+                const ctx = document.getElementById('cafShareChart');
+                if (ctx) {
+                    cafShareChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: cafLabels,
+                            datasets: [{
+                                data: cafValues,
+                                backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#6366f1']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+            } else {
+                cafShareChart.data.labels = cafLabels;
+                cafShareChart.data.datasets[0].data = cafValues;
+                cafShareChart.update();
+            }
+        }
+
+        function startRealtimeListeners() {
+            unsubscribers.forEach(unsub => unsub && unsub());
+            unsubscribers = [];
+
+            unsubscribers.push(onSnapshot(collection(db, 'students'), (snapshot) => {
+                studentsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderStudentsTable();
+                renderFeedbackTable();
+                updateDashboard();
+            }));
+
+            unsubscribers.push(onSnapshot(collection(db, 'cafs'), (snapshot) => {
+                cachedCafs = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderCafsTable();
+                renderTerminalsTable();
+                renderMealLogsTable();
+                renderAnalytics();
+                updateDashboard();
+            }));
+
+            unsubscribers.push(onSnapshot(collection(db, 'terminals'), (snapshot) => {
+                terminalsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderTerminalsTable();
+                updateDashboard();
+            }));
+
+            unsubscribers.push(onSnapshot(collection(db, 'mealLogs'), (snapshot) => {
+                mealLogsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderMealLogsTable();
+                renderAnalytics();
+                updateDashboard();
+            }));
+
+            unsubscribers.push(onSnapshot(collection(db, 'rfidRequests'), (snapshot) => {
+                rfidRequestsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderRfidRequestsTable();
+            }));
+
+            unsubscribers.push(onSnapshot(collection(db, 'mealSessions'), (snapshot) => {
+                mealSessionsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderMealSessionsTable();
+                renderAnalytics();
+            }));
+
+            unsubscribers.push(onSnapshot(collection(db, 'feedback'), (snapshot) => {
+                feedbackData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderFeedbackTable();
+                renderAnalytics();
+            }));
+        }
+
+        function wireStudentSearch() {
+            const input = document.getElementById('studentSearch');
+            if (!input) {
+                return;
+            }
+            input.addEventListener('input', (e) => {
+                studentSearchTerm = e.target.value || '';
+                renderStudentsTable();
+            });
+        }
+
+        window.exportStudents = function() {
+            if (studentsData.length === 0) {
+                return;
+            }
+            const rows = [
+                ['Matric Number', 'Full Name', 'Department', 'Level', 'Email', 'RFID Status']
+            ];
+            studentsData.forEach(student => {
+                rows.push([
+                    student.matricNumber || '',
+                    student.fullName || '',
+                    student.department || '',
+                    student.level || '',
+                    student.email || '',
+                    student.rfidStatus || ''
+                ]);
+            });
+
+            const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'students.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        };
+
+        window.editMealSession = function(sessionId) {
+            const session = mealSessionsData.find(item => item.id === sessionId);
+            if (!session) {
+                return;
+            }
+            document.getElementById('mealSessionModalTitle').textContent = 'Edit Meal Session';
+            document.getElementById('sessionId').value = session.id;
+            document.getElementById('sessionName').value = session.name || '';
+            document.getElementById('sessionStart').value = session.startTime || '';
+            document.getElementById('sessionEnd').value = session.endTime || '';
+            openMealSessionModal(true);
+        };
+
+        window.deleteMealSession = async function(sessionId) {
+            if (!confirm('Delete this meal session?')) {
+                return;
+            }
+            await updateDoc(doc(db, 'mealSessions', sessionId), { status: 'Inactive', updatedAt: serverTimestamp() });
+            renderMealSessionsTable();
+        };
 
         window.openCAFModal = function() {
             document.getElementById('cafModal').classList.add('active');
@@ -1044,12 +1527,12 @@
 
             await addDoc(collection(db, 'cafs'), caf);
             closeCAFModal();
-            await updateDashboard();
-            loadCafsTable();
+            updateDashboard();
+            renderCafsTable();
         };
 
         window.openTerminalModal = async function() {
-            await loadCafsTable();
+            renderCafsTable();
             const select = document.getElementById('terminalCAF');
             select.innerHTML = '<option value="">-- Select CAF --</option>';
             cachedCafs.forEach(caf => {
@@ -1067,6 +1550,69 @@
             document.getElementById('terminalModal').classList.remove('active');
         };
 
+        window.handleUpdateRfid = async function(requestId, studentId, status) {
+            const updatePayload = {
+                status,
+                updatedAt: serverTimestamp()
+            };
+
+            if (status === 'approved') {
+                const cardId = prompt('Enter RFID card ID for this student:');
+                if (!cardId) {
+                    return;
+                }
+                updatePayload.rfidCardId = cardId;
+                await updateDoc(doc(db, 'students', studentId), {
+                    rfidStatus: 'approved',
+                    rfidCardId: cardId,
+                    updatedAt: serverTimestamp()
+                });
+            } else {
+                await updateDoc(doc(db, 'students', studentId), {
+                    rfidStatus: 'rejected',
+                    rfidCardId: '',
+                    updatedAt: serverTimestamp()
+                });
+            }
+
+            await updateDoc(doc(db, 'rfidRequests', requestId), updatePayload);
+            renderRfidRequestsTable();
+        };
+
+        window.openMealSessionModal = function(keepData = false) {
+            document.getElementById('mealSessionModal').classList.add('active');
+            if (!keepData) {
+                document.getElementById('mealSessionForm').reset();
+                document.getElementById('sessionId').value = '';
+                document.getElementById('mealSessionModalTitle').textContent = 'Add Meal Session';
+            }
+        };
+
+        window.closeMealSessionModal = function() {
+            document.getElementById('mealSessionModal').classList.remove('active');
+        };
+
+        window.handleAddMealSession = async function(e) {
+            e.preventDefault();
+
+            const sessionId = document.getElementById('sessionId').value;
+            const session = {
+                name: document.getElementById('sessionName').value,
+                startTime: document.getElementById('sessionStart').value,
+                endTime: document.getElementById('sessionEnd').value,
+                status: 'Active',
+                updatedAt: serverTimestamp()
+            };
+
+            if (sessionId) {
+                await updateDoc(doc(db, 'mealSessions', sessionId), session);
+            } else {
+                session.createdAt = serverTimestamp();
+                await addDoc(collection(db, 'mealSessions'), session);
+            }
+            closeMealSessionModal();
+            renderMealSessionsTable();
+        };
         window.handleAddTerminal = async function(e) {
             e.preventDefault();
 
@@ -1074,13 +1620,14 @@
                 terminalId: document.getElementById('terminalId').value,
                 cafId: document.getElementById('terminalCAF').value,
                 location: document.getElementById('terminalLocation').value,
+                accessKey: document.getElementById('terminalAccessKey').value || '',
                 createdAt: serverTimestamp()
             };
 
             await addDoc(collection(db, 'terminals'), terminal);
             closeTerminalModal();
-            await updateDashboard();
-            loadTerminalsTable();
+            updateDashboard();
+            renderTerminalsTable();
         };
 
         window.openBarcodeModal = function(matricNumber) {
@@ -1109,3 +1656,16 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+

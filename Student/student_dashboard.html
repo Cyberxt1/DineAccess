@@ -13,17 +13,19 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at 20% 20%, #fef3c7, transparent 55%),
+                        radial-gradient(circle at 80% 0%, #bae6fd, transparent 45%),
+                        linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
             line-height: 1.6;
         }
 
         header {
-            background-color: #fff;
-            border-bottom: 1px solid #e8e8e8;
+            background-color: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
             padding: 1.25rem 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
         }
 
         .header-container {
@@ -45,17 +47,17 @@
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1f2937;
+            color: #f8fafc;
         }
 
         .user-info {
             font-size: 0.95rem;
-            color: #666;
+            color: #cbd5f5;
         }
 
         .user-name {
             font-weight: 600;
-            color: #1f2937;
+            color: #f8fafc;
         }
 
         .logout-btn {
@@ -100,10 +102,11 @@
         }
 
         .card {
-            background-color: #fff;
-            border-radius: 8px;
+            background-color: rgba(15, 23, 42, 0.75);
+            border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(148, 163, 184, 0.2);
             transition: box-shadow 0.3s ease;
         }
 
@@ -113,7 +116,7 @@
 
         .card-title {
             font-size: 0.95rem;
-            color: #666;
+            color: #94a3b8;
             margin-bottom: 1rem;
             font-weight: 600;
         }
@@ -132,13 +135,13 @@
         .stat-value {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #2563eb;
+            color: #38bdf8;
             margin-bottom: 0.25rem;
         }
 
         .stat-label {
             font-size: 0.85rem;
-            color: #999;
+            color: #94a3b8;
         }
 
         .quick-actions {
@@ -150,7 +153,7 @@
         .quick-action {
             flex: 1;
             min-width: 150px;
-            background-color: #2563eb;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
             color: white;
             border: none;
             padding: 0.75rem 1.25rem;
@@ -166,11 +169,37 @@
         }
 
         .quick-action.secondary {
-            background-color: #6b7280;
+            background: rgba(148, 163, 184, 0.15);
+            color: #e2e8f0;
         }
 
         .quick-action.secondary:hover {
-            background-color: #4b5563;
+            background: rgba(148, 163, 184, 0.3);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-none {
+            background-color: #e5e7eb;
+            color: #374151;
         }
 
         .barcode-wrap {
@@ -186,16 +215,17 @@
         }
 
         .attendance-section {
-            background-color: #fff;
-            border-radius: 8px;
+            background-color: rgba(15, 23, 42, 0.75);
+            border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(148, 163, 184, 0.2);
         }
 
         .section-title {
             font-size: 1.25rem;
             font-weight: 700;
-            color: #1f2937;
+            color: #f8fafc;
             margin-bottom: 1.5rem;
         }
 
@@ -205,27 +235,27 @@
         }
 
         .attendance-table thead {
-            background-color: #f3f4f6;
-            border-bottom: 2px solid #e5e7eb;
+            background-color: rgba(30, 41, 59, 0.9);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
         }
 
         .attendance-table th {
             padding: 0.75rem;
             text-align: left;
             font-weight: 600;
-            color: #374151;
+            color: #e2e8f0;
             font-size: 0.9rem;
         }
 
         .attendance-table td {
             padding: 0.75rem;
-            border-bottom: 1px solid #e5e7eb;
-            color: #555;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            color: #cbd5f5;
             font-size: 0.9rem;
         }
 
         .attendance-table tbody tr:hover {
-            background-color: #f9fafb;
+            background-color: rgba(30, 41, 59, 0.5);
         }
 
         .status-badge {
@@ -244,7 +274,7 @@
         .empty-state {
             text-align: center;
             padding: 2rem;
-            color: #999;
+            color: #94a3b8;
         }
 
         .empty-state-icon {
@@ -270,20 +300,21 @@
         }
 
         .modal-content {
-            background-color: #fff;
+            background-color: rgba(15, 23, 42, 0.9);
             border-radius: 8px;
             padding: 2rem;
             max-width: 600px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(148, 163, 184, 0.25);
         }
 
         .modal-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1f2937;
+            color: #f8fafc;
             margin-bottom: 1.5rem;
         }
 
@@ -295,7 +326,7 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #374151;
+            color: #e2e8f0;
             font-size: 0.9rem;
         }
 
@@ -304,19 +335,21 @@
         .form-group textarea {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            border-radius: 10px;
             font-size: 0.95rem;
             font-family: inherit;
             transition: border-color 0.3s ease;
+            background: rgba(15, 23, 42, 0.4);
+            color: #f8fafc;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
         }
 
         .form-group input[readonly] {
@@ -343,21 +376,21 @@
         }
 
         .btn-submit {
-            background-color: #2563eb;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
             color: white;
         }
 
         .btn-submit:hover {
-            background-color: #1d4ed8;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
         }
 
         .btn-cancel {
-            background-color: #e5e7eb;
-            color: #374151;
+            background: rgba(148, 163, 184, 0.15);
+            color: #e2e8f0;
         }
 
         .btn-cancel:hover {
-            background-color: #d1d5db;
+            background: rgba(148, 163, 184, 0.3);
         }
 
         .success-message {
@@ -389,7 +422,6 @@
             }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             header {
                 padding: 1rem;
@@ -674,7 +706,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="header-container">
             <div class="header-left">
@@ -688,12 +719,10 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
         <div class="page-title">Dashboard</div>
         <div class="page-subtitle">Manage your cafeteria attendance and meals</div>
 
-        <!-- Quick Stats -->
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-title">Quick Stats</div>
@@ -709,13 +738,21 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
             <div class="card">
                 <div class="card-title">Quick Actions</div>
                 <div class="quick-actions">
-                    <button class="quick-action" onclick="openModal('bookFoodModal')">📦 Request RFID</button>
-                    <button class="quick-action secondary" onclick="openModal('updateProfileModal')">⚙️ Update Profile</button>
+                    <button class="quick-action secondary" onclick="openModal('updateProfileModal')">Update Profile</button>
+                    <button class="quick-action" onclick="openModal('feedbackModal')">Leave Feedback</button>
                 </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">RFID Status</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                    <span class="badge badge-none" id="rfidStatusBadge">Not Requested</span>
+                    <button class="quick-action" id="rfidRequestBtn" onclick="openModal('rfidModal')">Request RFID</button>
+                </div>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: #6b7280;" id="rfidStatusNote">Submit your request to get an RFID card.</div>
             </div>
 
             <div class="card">
@@ -727,7 +764,6 @@
             </div>
         </div>
 
-        <!-- Attendance Section -->
         <div class="attendance-section">
             <div class="section-title">Recent Attendance</div>
             <table class="attendance-table">
@@ -753,18 +789,17 @@
         </div>
     </main>
 
-    <!-- Book Food Modal -->
-    <div class="modal" id="bookFoodModal">
+    <div class="modal" id="rfidModal">
         <div class="modal-content">
-            <div class="modal-title">Book Food Ahead</div>
-            <p style="color: #666; margin-bottom: 1.5rem;">Coming soon! This feature will allow you to pre-order meals and have them delivered to your hostel.</p>
+            <div class="modal-title">Request RFID</div>
+            <p style="color: #666; margin-bottom: 1.5rem;">Submit your request for an RFID card. You will be notified once approved.</p>
             <div class="modal-buttons">
-                <button class="btn-cancel" onclick="closeModal('bookFoodModal')">Close</button>
+                <button class="btn-cancel" onclick="closeModal('rfidModal')">Cancel</button>
+                <button class="btn-submit" onclick="submitRfidRequest()">Submit Request</button>
             </div>
         </div>
     </div>
 
-    <!-- Update Profile Modal -->
     <div class="modal" id="updateProfileModal">
         <div class="modal-content">
             <div class="modal-title">Update Profile</div>
@@ -798,16 +833,54 @@
         </div>
     </div>
 
-    <!-- Success Message -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-title">Student Feedback</div>
+            <form onsubmit="handleFeedbackSubmit(event)">
+                <div class="form-group">
+                    <label>Rating</label>
+                    <select id="feedbackRating" required>
+                        <option value="">Select rating</option>
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Good</option>
+                        <option value="3">3 - Fair</option>
+                        <option value="2">2 - Poor</option>
+                        <option value="1">1 - Very Poor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Comment</label>
+                    <textarea id="feedbackComment" rows="4" placeholder="Share your dining experience..."></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeModal('feedbackModal')">Cancel</button>
+                    <button type="submit" class="btn-submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="success-message" id="successMessage">✓ Changes saved successfully!</div>
 
     <script type="module">
         import { auth, db } from "../firebase.js";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import {
+            addDoc,
+            collection,
+            doc,
+            onSnapshot,
+            orderBy,
+            query,
+            serverTimestamp,
+            updateDoc,
+            limit
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         let currentUserId = null;
         let studentData = null;
+        let unsubscribeStudent = null;
+        let unsubscribeAttendance = null;
 
         function renderBarcode(matricNumber) {
             if (!matricNumber) {
@@ -823,83 +896,124 @@
             document.getElementById('barcodeMatric').textContent = `Matric: ${matricNumber}`;
         }
 
-        async function loadDashboard(userId) {
-            const studentRef = doc(db, 'students', userId);
-            const studentSnap = await getDoc(studentRef);
+        function updateRfidStatus(status, cardId) {
+            const badge = document.getElementById('rfidStatusBadge');
+            const note = document.getElementById('rfidStatusNote');
+            const button = document.getElementById('rfidRequestBtn');
 
-            if (!studentSnap.exists()) {
-                await signOut(auth);
-                window.location.href = 'student_login.html';
-                return;
+            if (status === 'approved') {
+                badge.className = 'badge badge-approved';
+                badge.textContent = 'Approved';
+                note.textContent = cardId ? `RFID Card: ${cardId}` : 'Your RFID request is approved.';
+                button.disabled = true;
+                button.textContent = 'Approved';
+            } else if (status === 'pending') {
+                badge.className = 'badge badge-pending';
+                badge.textContent = 'Pending';
+                note.textContent = 'Your request is being reviewed.';
+                button.disabled = true;
+                button.textContent = 'Pending';
+            } else if (status === 'rejected') {
+                badge.className = 'badge badge-none';
+                badge.textContent = 'Rejected';
+                note.textContent = 'Your request was rejected. You may request again.';
+                button.disabled = false;
+                button.textContent = 'Request RFID';
+            } else {
+                badge.className = 'badge badge-none';
+                badge.textContent = 'Not Requested';
+                note.textContent = 'Submit your request to get an RFID card.';
+                button.disabled = false;
+                button.textContent = 'Request RFID';
             }
-
-            studentData = studentSnap.data();
-            document.getElementById('displayName').textContent = studentData.fullName || 'Student';
-            document.getElementById('displayLevel').textContent = studentData.level || '100';
-
-            document.getElementById('matricEdit').value = studentData.matricNumber || '';
-            document.getElementById('nameEdit').value = studentData.fullName || '';
-            document.getElementById('departmentEdit').value = studentData.department || '';
-            document.getElementById('levelEdit').value = studentData.level || '100';
-
-            renderBarcode(studentData.matricNumber);
-            await loadAttendance(userId);
         }
 
-        async function loadAttendance(userId) {
-            const attendanceRef = collection(db, 'students', userId, 'attendance');
-            const attendanceQuery = query(attendanceRef, orderBy('timestamp', 'desc'), limit(20));
-            const attendanceSnapshot = await getDocs(attendanceQuery);
-            const tbody = document.getElementById('attendanceTableBody');
-
-            if (attendanceSnapshot.empty) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📋</div>
-                                <div>No attendance records yet</div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                document.getElementById('mealsThisMonth').textContent = '0';
-                document.getElementById('mealsThisWeek').textContent = '0';
-                return;
+        function listenToStudent(userId) {
+            if (unsubscribeStudent) {
+                unsubscribeStudent();
             }
 
-            const now = new Date();
-            const attendance = attendanceSnapshot.docs.map(docSnap => docSnap.data());
+            const studentRef = doc(db, 'students', userId);
+            unsubscribeStudent = onSnapshot(studentRef, (studentSnap) => {
+                if (!studentSnap.exists()) {
+                    signOut(auth);
+                    window.location.href = 'student_login.html';
+                    return;
+                }
 
-            const thisMonth = attendance.filter(record => {
-                const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
-                return recordDate.getMonth() === now.getMonth() && recordDate.getFullYear() === now.getFullYear();
+                studentData = studentSnap.data();
+                document.getElementById('displayName').textContent = studentData.fullName || 'Student';
+                document.getElementById('displayLevel').textContent = studentData.level || '100';
+
+                document.getElementById('matricEdit').value = studentData.matricNumber || '';
+                document.getElementById('nameEdit').value = studentData.fullName || '';
+                document.getElementById('departmentEdit').value = studentData.department || '';
+                document.getElementById('levelEdit').value = studentData.level || '100';
+
+                renderBarcode(studentData.matricNumber);
+                updateRfidStatus(studentData.rfidStatus || 'none', studentData.rfidCardId || '');
             });
+        }
 
-            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            const thisWeek = attendance.filter(record => {
-                const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
-                return recordDate >= weekAgo;
+        function listenToAttendance(userId) {
+            if (unsubscribeAttendance) {
+                unsubscribeAttendance();
+            }
+
+            const attendanceRef = collection(db, 'students', userId, 'attendance');
+            const attendanceQuery = query(attendanceRef, orderBy('timestamp', 'desc'), limit(20));
+
+            unsubscribeAttendance = onSnapshot(attendanceQuery, (attendanceSnapshot) => {
+                const tbody = document.getElementById('attendanceTableBody');
+                if (attendanceSnapshot.empty) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📋</div>
+                                    <div>No attendance records yet</div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    document.getElementById('mealsThisMonth').textContent = '0';
+                    document.getElementById('mealsThisWeek').textContent = '0';
+                    return;
+                }
+
+                const now = new Date();
+                const attendance = attendanceSnapshot.docs.map(docSnap => docSnap.data());
+
+                const thisMonth = attendance.filter(record => {
+                    const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+                    return recordDate.getMonth() === now.getMonth() && recordDate.getFullYear() === now.getFullYear();
+                });
+
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                const thisWeek = attendance.filter(record => {
+                    const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+                    return recordDate >= weekAgo;
+                });
+
+                document.getElementById('mealsThisMonth').textContent = thisMonth.length;
+                document.getElementById('mealsThisWeek').textContent = thisWeek.length;
+
+                tbody.innerHTML = attendance.map(record => {
+                    const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+                    const displayDate = recordDate.toLocaleDateString();
+                    const displayTime = recordDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <tr>
+                            <td data-label="Date">${displayDate}</td>
+                            <td data-label="Meal Type">${record.mealType || 'Standard'}</td>
+                            <td data-label="Time">${displayTime}</td>
+                            <td data-label="Status">
+                                <span class="status-badge attended">✓ Attended</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             });
-
-            document.getElementById('mealsThisMonth').textContent = thisMonth.length;
-            document.getElementById('mealsThisWeek').textContent = thisWeek.length;
-
-            tbody.innerHTML = attendance.map(record => {
-                const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
-                const displayDate = recordDate.toLocaleDateString();
-                const displayTime = recordDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                return `
-                    <tr>
-                        <td data-label="Date">${displayDate}</td>
-                        <td data-label="Meal Type">${record.mealType || 'Standard'}</td>
-                        <td data-label="Time">${displayTime}</td>
-                        <td data-label="Status">
-                            <span class="status-badge attended">✓ Attended</span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
         }
 
         window.openModal = function(modalId) {
@@ -920,13 +1034,69 @@
             const updatedData = {
                 fullName: document.getElementById('nameEdit').value.trim(),
                 department: document.getElementById('departmentEdit').value.trim(),
-                level: document.getElementById('levelEdit').value
+                level: document.getElementById('levelEdit').value,
+                updatedAt: serverTimestamp()
             };
 
             await updateDoc(doc(db, 'students', currentUserId), updatedData);
             closeModal('updateProfileModal');
-            await loadDashboard(currentUserId);
             showSuccess('Profile updated successfully!');
+        };
+
+        window.submitRfidRequest = async function() {
+            if (!currentUserId || !studentData) {
+                return;
+            }
+
+            if (studentData.rfidStatus === 'pending' || studentData.rfidStatus === 'approved') {
+                closeModal('rfidModal');
+                return;
+            }
+
+            await addDoc(collection(db, 'rfidRequests'), {
+                studentId: currentUserId,
+                matricNumber: studentData.matricNumber,
+                fullName: studentData.fullName,
+                department: studentData.department,
+                status: 'pending',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+
+            await updateDoc(doc(db, 'students', currentUserId), {
+                rfidStatus: 'pending',
+                updatedAt: serverTimestamp()
+            });
+
+            closeModal('rfidModal');
+            showSuccess('RFID request submitted!');
+        };
+
+        window.handleFeedbackSubmit = async function(event) {
+            event.preventDefault();
+            if (!currentUserId || !studentData) {
+                return;
+            }
+
+            const rating = parseInt(document.getElementById('feedbackRating').value, 10);
+            const comment = document.getElementById('feedbackComment').value.trim();
+            if (!rating) {
+                return;
+            }
+
+            await addDoc(collection(db, 'feedback'), {
+                studentId: currentUserId,
+                studentName: studentData.fullName || '',
+                matricNumber: studentData.matricNumber || '',
+                rating,
+                comment,
+                createdAt: serverTimestamp()
+            });
+
+            document.getElementById('feedbackRating').value = '';
+            document.getElementById('feedbackComment').value = '';
+            closeModal('feedbackModal');
+            showSuccess('Feedback submitted. Thank you!');
         };
 
         window.handleLogout = async function() {
@@ -949,7 +1119,8 @@
                 return;
             }
             currentUserId = user.uid;
-            loadDashboard(user.uid).catch(error => console.error('Dashboard error:', error));
+            listenToStudent(user.uid);
+            listenToAttendance(user.uid);
         });
 
         document.querySelectorAll('.modal').forEach(modal => {
@@ -962,3 +1133,4 @@
     </script>
 </body>
 </html>
+
