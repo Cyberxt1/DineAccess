@@ -452,7 +452,6 @@
             } catch (error) {
                 console.error('Registration error:', error);
                 showError(error.message || 'Registration failed');
-            } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Complete Registration';
             }
