@@ -324,10 +324,11 @@
                             type="text"
                             id="matricNumber"
                             name="matricNumber"
-                            placeholder="e.g., 2024/12345"
+                            placeholder="e.g., 22/0410"
+                            pattern="\\d{2}/\\d{4}"
                             required
                         >
-                        <span class="help-text">Your unique identification number</span>
+                        <span class="help-text">Format: YY/NNNN (e.g., 22/0410)</span>
                     </div>
                     <div class="form-group">
                         <label for="fullName">Full Name *</label>
@@ -424,6 +425,12 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const submitBtn = form.querySelector('button[type="submit"]');
+
+            const matricPattern = /^\d{2}\/\d{4}$/;
+            if (!matricPattern.test(matricNumber)) {
+                showError('Matric number must match format YY/NNNN (e.g., 22/0410).');
+                return;
+            }
 
             if (!matricNumber || !fullName || !department || !level || !email || !password) {
                 showError('Please fill in all required fields');
