@@ -91,6 +91,7 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .nav-links a {
@@ -668,8 +669,9 @@
 
             .header-left {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: flex-start;
                 gap: 0;
+                padding-left: 3rem;
             }
 
             .nav-toggle {
@@ -693,13 +695,15 @@
 
             .nav-links {
                 width: 100%;
-                flex-direction: column;
-                align-items: flex-start;
                 display: none;
+                justify-content: flex-end;
+                gap: 0.6rem;
             }
 
             .nav-links.active {
                 display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
             }
 
             main {

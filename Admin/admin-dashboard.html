@@ -1771,7 +1771,8 @@
                     showToast('Update sent successfully.', 'success', 'Updates');
                 } catch (error) {
                     console.error(error);
-                    showToast('Failed to send update.', 'error', 'Updates');
+                    const msg = error?.message ? error.message : 'Failed to send update.';
+                    showToast(msg, 'error', 'Updates');
                 } finally {
                     setLoading(false);
                 }
