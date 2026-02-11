@@ -28,21 +28,58 @@
             background: rgba(15, 23, 42, 0.75);
             border-radius: 20px;
             padding: 32px;
-            max-width: 580px;
+            max-width: 900px;
             width: 100%;
             border: 1px solid rgba(148, 163, 184, 0.25);
             box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
             backdrop-filter: blur(12px);
         }
 
-        .scanner-card h1 {
-            font-size: 26px;
-            margin-bottom: 8px;
+        .scanner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
-        .scanner-card p {
+        .scanner-header h1 {
+            font-size: 28px;
+        }
+
+        .scanner-header p {
             color: #cbd5f5;
-            margin-bottom: 24px;
+            margin-top: 6px;
+        }
+
+        .status-pill {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .status-pill.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .scanner-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 320px) 1fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            padding: 20px;
         }
 
         .form-group {
@@ -91,7 +128,7 @@
             margin-top: 16px;
             font-size: 14px;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 12px;
             display: none;
         }
 
@@ -116,41 +153,100 @@
             color: #bae6fd;
             text-decoration: none;
         }
+
+        .scan-screen {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .scan-screen.active {
+            display: flex;
+        }
+
+        .scan-input {
+            font-size: 1.6rem;
+            padding: 18px 20px;
+            border-radius: 14px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .scan-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            color: #cbd5f5;
+        }
+
+        .scan-meta span {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 999px;
+            padding: 6px 12px;
+        }
+
+        @media (max-width: 768px) {
+            .scanner-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="scanner-card">
         <a class="back-link" href="admin-inner-landing.html">← Back to Admin</a>
-        <h1>CAF Scanner</h1>
-        <p>Scan a student barcode (matric number) to log a meal.</p>
 
-        <form id="scanForm">
-            <div class="form-group">
-                <label for="matricInput">Matric / Barcode</label>
-                <input type="text" id="matricInput" placeholder="Enter or scan matric number" required>
+        <div class="scanner-header">
+            <div>
+                <h1>CAF Scanner</h1>
+                <p>Authenticate and select a cafeteria to begin fast scanning.</p>
             </div>
-            <div class="form-group">
-                <label for="cafSelect">CAF Location</label>
-                <select id="cafSelect" required>
-                    <option value="">Select CAF</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="sessionSelect">Meal Session</label>
-                <select id="sessionSelect" required>
-                    <option value="">Select Session</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="terminalSelect">Terminal (Optional)</label>
-                <select id="terminalSelect">
-                    <option value="">Select Terminal</option>
-                </select>
-            </div>
-            <button class="btn" type="submit">Log Meal</button>
-        </form>
+            <div id="networkStatus" class="status-pill">Online</div>
+        </div>
 
-        <div id="statusBox" class="status"></div>
+        <div class="scanner-grid">
+            <div class="panel">
+                <form id="setupForm">
+                    <div class="form-group">
+                        <label for="cafSelect">CAF Location</label>
+                        <select id="cafSelect" required>
+                            <option value="">Select CAF</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionSelect">Meal Session</label>
+                        <select id="sessionSelect" required>
+                            <option value="">Select Session</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="terminalSelect">Terminal (Optional)</label>
+                        <select id="terminalSelect">
+                            <option value="">Select Terminal</option>
+                        </select>
+                    </div>
+                    <button class="btn" type="submit">Start Scanning</button>
+                </form>
+            </div>
+
+            <div class="panel scan-screen" id="scanScreen">
+                <div class="scan-meta">
+                    <span id="activeCaf">CAF: -</span>
+                    <span id="activeSession">Session: -</span>
+                    <span id="activeTerminal">Terminal: -</span>
+                </div>
+                <form id="scanForm">
+                    <div class="form-group">
+                        <label for="matricInput">Scan Matric / Barcode</label>
+                        <input class="scan-input" type="text" id="matricInput" placeholder="Scan barcode..." required>
+                    </div>
+                    <button class="btn" type="submit">Log Meal</button>
+                </form>
+                <div id="statusBox" class="status"></div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -172,11 +268,28 @@
         const terminalSelect = document.getElementById('terminalSelect');
         const statusBox = document.getElementById('statusBox');
         const matricInput = document.getElementById('matricInput');
+        const setupForm = document.getElementById('setupForm');
+        const scanForm = document.getElementById('scanForm');
+        const scanScreen = document.getElementById('scanScreen');
+        const activeCaf = document.getElementById('activeCaf');
+        const activeSession = document.getElementById('activeSession');
+        const activeTerminal = document.getElementById('activeTerminal');
+        const networkStatus = document.getElementById('networkStatus');
         const offlineQueueKey = 'caf_offline_queue';
 
         function showStatus(message, type) {
             statusBox.textContent = message;
             statusBox.className = `status ${type}`;
+        }
+
+        function updateNetworkStatus() {
+            if (navigator.onLine) {
+                networkStatus.textContent = 'Online';
+                networkStatus.classList.remove('offline');
+            } else {
+                networkStatus.textContent = 'Offline';
+                networkStatus.classList.add('offline');
+            }
         }
 
         function getQueue() {
@@ -280,9 +393,31 @@
 
         window.addEventListener('online', () => {
             syncQueue();
+            updateNetworkStatus();
         });
 
-        document.getElementById('scanForm').addEventListener('submit', async (e) => {
+        window.addEventListener('offline', () => {
+            updateNetworkStatus();
+        });
+
+        setInterval(() => {
+            syncQueue();
+        }, 15000);
+
+        setupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!cafSelect.value || !sessionSelect.value) {
+                showStatus('Select CAF and Session to start.', 'error');
+                return;
+            }
+            scanScreen.classList.add('active');
+            activeCaf.textContent = `CAF: ${cafSelect.options[cafSelect.selectedIndex]?.textContent || '-'}`;
+            activeSession.textContent = `Session: ${sessionSelect.options[sessionSelect.selectedIndex]?.textContent || '-'}`;
+            activeTerminal.textContent = `Terminal: ${terminalSelect.options[terminalSelect.selectedIndex]?.textContent || 'None'}`;
+            setTimeout(() => matricInput.focus(), 200);
+        });
+
+        scanForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const matricNumber = matricInput.value.trim();
@@ -373,6 +508,8 @@
                 showStatus('Offline mode: log queued for sync.', 'success');
             }
         });
+
+        updateNetworkStatus();
     </script>
 </body>
 </html>
