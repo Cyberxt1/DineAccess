@@ -1348,6 +1348,13 @@
         function initRealtimeLoading() {
             pendingLoads = new Set(['student', 'attendance']);
             setLoading(true, 'Syncing your dashboard...');
+            setTimeout(() => {
+                if (pendingLoads.size > 0) {
+                    pendingLoads.clear();
+                    setLoading(false);
+                    showToast('Live data is taking longer than expected.', 'warning', 'Sync');
+                }
+            }, 8000);
         }
 
         function markLoaded(key) {
@@ -1705,6 +1712,10 @@
                 updateRfidStatus(studentData.rfidStatus || 'none', studentData.rfidCardId || '');
                 renderStudentUpdates();
                 markLoaded('student');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load profile data.', 'error', 'Sync');
+                markLoaded('student');
             });
         }
 
@@ -1779,6 +1790,10 @@
                         </tr>
                     `;
                 }).join('');
+                markLoaded('attendance');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load attendance data.', 'error', 'Sync');
                 markLoaded('attendance');
             });
         }
