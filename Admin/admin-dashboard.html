@@ -352,6 +352,19 @@
             gap: 16px;
         }
 
+        .leaderboard-card {
+            background-color: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .leaderboard-meta {
+            color: var(--color-text-secondary);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
         .update-card {
             background-color: rgba(15, 23, 42, 0.85);
             border: 1px solid var(--color-border);
@@ -780,6 +793,7 @@
                 <li><a href="#" onclick="navigateTo(event, 'meal-sessions')" class="nav-link">Meal Sessions</a></li>
                 <li><a href="#" onclick="navigateTo(event, 'meal-logs')" class="nav-link">Meal Logs</a></li>
                 <li><a href="#" onclick="navigateTo(event, 'updates')" class="nav-link">Updates</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'leaderboards')" class="nav-link">Leaderboards</a></li>
                 <li><a href="#" onclick="navigateTo(event, 'settings')" class="nav-link">Settings</a></li>
             </ul>
         </nav>
@@ -1145,6 +1159,41 @@
                 </div>
             </div>
 
+            <div id="leaderboards" class="page">
+                <div class="page-title">Leaderboards</div>
+                <div class="page-subtitle">Top students by streaks and badge levels</div>
+
+                <div class="leaderboard-card">
+                    <div class="leaderboard-meta">Updated in real time from meal logs.</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student</th>
+                                    <th>Matric</th>
+                                    <th>Total Meals</th>
+                                    <th>Current Streak</th>
+                                    <th>Best Streak</th>
+                                    <th>Badge</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardTable">
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🏆</div>
+                                            <div class="empty-state-title">No leaderboard data yet</div>
+                                            <p>Meal logs will populate the leaderboard.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div id="settings" class="page">
                 <div class="page-title">Settings</div>
                 <div class="page-subtitle">System configuration</div>
@@ -1446,6 +1495,8 @@
                 renderMealSessionsTable();
             } else if (page === 'updates') {
                 renderUpdatesList();
+            } else if (page === 'leaderboards') {
+                renderLeaderboard();
             }
 
             document.body.classList.remove('nav-open');
@@ -1485,6 +1536,7 @@
             document.getElementById('mealToday').textContent = mealToday.length;
             document.getElementById('activeCafs').textContent = cachedCafs.length;
             document.getElementById('activeTerminals').textContent = terminalsData.length;
+            renderLeaderboard();
         }
 
         function renderStudentsTable() {
@@ -1821,6 +1873,134 @@
             }
 
             renderCharts(last7);
+        }
+
+        function computeStreakFromDates(dateKeys) {
+            if (!dateKeys.length) {
+                return { currentStreak: 0, bestStreak: 0 };
+            }
+
+            const sorted = Array.from(new Set(dateKeys)).sort();
+            let bestStreak = 0;
+            let streak = 0;
+            for (let i = 0; i < sorted.length; i += 1) {
+                if (i === 0) {
+                    streak = 1;
+                } else {
+                    const prev = new Date(sorted[i - 1]);
+                    const curr = new Date(sorted[i]);
+                    const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+                    streak = diff === 1 ? streak + 1 : 1;
+                }
+                if (streak > bestStreak) {
+                    bestStreak = streak;
+                }
+            }
+
+            const today = new Date();
+            const todayKey = today.toISOString().slice(0, 10);
+            const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+            const startKey = sorted.includes(todayKey)
+                ? todayKey
+                : sorted.includes(yesterday.toISOString().slice(0, 10))
+                    ? yesterday.toISOString().slice(0, 10)
+                    : null;
+
+            let currentStreak = 0;
+            if (startKey) {
+                let cursor = new Date(startKey);
+                while (sorted.includes(cursor.toISOString().slice(0, 10))) {
+                    currentStreak += 1;
+                    cursor = new Date(cursor.getTime() - 24 * 60 * 60 * 1000);
+                }
+            }
+
+            return { currentStreak, bestStreak };
+        }
+
+        function badgeForMeals(totalMeals) {
+            if (totalMeals >= 50) return 'Caf Legend';
+            if (totalMeals >= 30) return 'Caf Champion';
+            if (totalMeals >= 15) return 'Caf Warrior';
+            if (totalMeals >= 5) return 'Caf Rookie';
+            return 'Newbie';
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboardTable');
+            if (!tbody) {
+                return;
+            }
+
+            if (mealLogsData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🏆</div>
+                                <div class="empty-state-title">No leaderboard data yet</div>
+                                <p>Meal logs will populate the leaderboard.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const studentMap = new Map(studentsData.map(student => [student.id, student]));
+            const grouped = {};
+            mealLogsData.forEach(log => {
+                if (!log.studentId) {
+                    return;
+                }
+                if (!grouped[log.studentId]) {
+                    grouped[log.studentId] = {
+                        studentId: log.studentId,
+                        totalMeals: 0,
+                        dateKeys: []
+                    };
+                }
+                grouped[log.studentId].totalMeals += 1;
+                if (log.dateKey) {
+                    grouped[log.studentId].dateKeys.push(log.dateKey);
+                } else if (log.timestamp) {
+                    const date = parseTimestamp(log.timestamp);
+                    if (date) {
+                        grouped[log.studentId].dateKeys.push(date.toISOString().slice(0, 10));
+                    }
+                }
+            });
+
+            const rows = Object.values(grouped).map(entry => {
+                const streaks = computeStreakFromDates(entry.dateKeys);
+                const student = studentMap.get(entry.studentId) || {};
+                return {
+                    ...entry,
+                    currentStreak: streaks.currentStreak,
+                    bestStreak: streaks.bestStreak,
+                    badge: badgeForMeals(entry.totalMeals),
+                    name: student.fullName || 'Unknown',
+                    matric: student.matricNumber || '-'
+                };
+            });
+
+            rows.sort((a, b) => {
+                if (b.bestStreak !== a.bestStreak) return b.bestStreak - a.bestStreak;
+                if (b.currentStreak !== a.currentStreak) return b.currentStreak - a.currentStreak;
+                return b.totalMeals - a.totalMeals;
+            });
+
+            tbody.innerHTML = rows.slice(0, 50).map((row, index) => `
+                <tr>
+                    <td>#${index + 1}</td>
+                    <td>${row.name}</td>
+                    <td>${row.matric}</td>
+                    <td>${row.totalMeals}</td>
+                    <td>${row.currentStreak}</td>
+                    <td>${row.bestStreak}</td>
+                    <td>${row.badge}</td>
+                </tr>
+            `).join('');
         }
 
         function renderCharts(last7Logs) {

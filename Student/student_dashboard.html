@@ -37,15 +37,25 @@
         }
 
         .header-top {
-            display: grid;
-            grid-template-columns: 40px 1fr 40px;
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        .header-spacer {
-            width: 40px;
-            height: 40px;
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         .nav-toggle {
@@ -64,17 +74,12 @@
             font-size: 1.5rem;
             font-weight: 700;
             color: #f8fafc;
-            text-align: center;
         }
 
         .user-info {
             font-size: 0.95rem;
             color: #cbd5f5;
-            text-align: center;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 16px;
-            padding: 0.75rem 1rem;
+            text-align: left;
         }
 
         .user-name {
@@ -102,7 +107,28 @@
             gap: 1rem;
             align-items: center;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: flex-start;
+        }
+
+        .header-stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 14px;
+            padding: 0.45rem 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+
+        .header-stat-card span {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+
+        .badge-icon {
+            font-size: 1rem;
         }
 
         .nav-links a {
@@ -676,6 +702,16 @@
                 gap: 0.6rem;
             }
 
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-stats {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
             .nav-toggle {
                 display: inline-flex;
                 align-items: center;
@@ -860,6 +896,11 @@
                 gap: 0.5rem;
             }
 
+            .header-stat-card {
+                width: 100%;
+                justify-content: space-between;
+            }
+
             .logo {
                 font-size: 1.1rem;
                 font-weight: 700;
@@ -963,13 +1004,24 @@
     <header>
         <div class="header-container">
             <div class="header-top">
-                <button class="nav-toggle" onclick="toggleStudentNav()">☰</button>
-                <div class="logo">🎓 CAF System</div>
-                <div class="header-spacer"></div>
-            </div>
-            <div class="user-info">
-                Welcome, <span class="user-name" id="displayName">Student</span>
-                <div style="font-size: 0.8rem; margin-top: 0.25rem;">Level: <span id="displayLevel">100</span></div>
+                <div class="header-brand">
+                    <button class="nav-toggle" onclick="toggleStudentNav()">☰</button>
+                    <div class="logo">🎓 CAF System</div>
+                    <div class="user-info">
+                        Welcome, <span class="user-name" id="displayName">Student</span>
+                        <div style="font-size: 0.8rem; margin-top: 0.25rem;">Level: <span id="displayLevel">100</span></div>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="header-stat-card">
+                        <div><strong id="headerStreak">0</strong> days</div>
+                        <span>Streak</span>
+                    </div>
+                    <div class="header-stat-card">
+                        <div class="badge-icon">🏅</div>
+                        <div><strong id="headerBadge">Caf Rookie</strong></div>
+                    </div>
+                </div>
             </div>
             <div class="nav-links" id="studentNav">
                 <a href="#overview">Overview</a>
@@ -1083,6 +1135,13 @@
                     </label>
                 </div>
                 <div style="margin-top: 0.6rem; font-size: 0.8rem; color: #94a3b8;">Toggle to receive email notifications.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Smart Insights</div>
+                <div id="smartInsights" style="display: grid; gap: 0.6rem; font-size: 0.9rem; color: #cbd5f5;">
+                    <div>Loading insights...</div>
+                </div>
             </div>
         </div>
 
@@ -1468,6 +1527,7 @@
             document.getElementById('bestStreak').textContent = bestStreak;
             document.getElementById('totalMealsAll').textContent = totalMeals;
             document.getElementById('totalDays').textContent = totalDays;
+            document.getElementById('headerStreak').textContent = currentStreak;
 
             const levelStep = 20;
             const level = Math.min(5, Math.floor(totalMeals / levelStep) + 1);
@@ -1483,11 +1543,54 @@
                 { name: 'Caf Champion', threshold: 30 },
                 { name: 'Caf Legend', threshold: 50 }
             ];
+            const currentBadge = badges.reduce((acc, badge) => (totalMeals >= badge.threshold ? badge.name : acc), 'Caf Rookie');
+            document.getElementById('headerBadge').textContent = currentBadge;
             const badgesMarkup = badges.map(badge => {
                 const unlocked = totalMeals >= badge.threshold;
                 return `<span class="badge-pill ${unlocked ? '' : 'locked'}">${badge.name}</span>`;
             }).join('');
             document.getElementById('badgesList').innerHTML = badgesMarkup;
+        }
+
+        function renderInsights(attendanceRecords) {
+            const insightsEl = document.getElementById('smartInsights');
+            if (!insightsEl) {
+                return;
+            }
+
+            if (!attendanceRecords.length) {
+                insightsEl.innerHTML = '<div>No meals logged yet. Your insights will appear here after your first visit.</div>';
+                return;
+            }
+
+            const now = new Date();
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const weekMeals = attendanceRecords.filter(record => {
+                const date = parseTimestamp(record.timestamp);
+                return date && date >= weekAgo;
+            }).length;
+            const monthMeals = attendanceRecords.filter(record => {
+                const date = parseTimestamp(record.timestamp);
+                return date && date >= monthStart;
+            }).length;
+
+            const latest = attendanceRecords.reduce((latestDate, record) => {
+                const date = parseTimestamp(record.timestamp);
+                if (!date) {
+                    return latestDate;
+                }
+                return !latestDate || date > latestDate ? date : latestDate;
+            }, null);
+
+            const lastVisitLabel = latest ? latest.toLocaleDateString() : 'Recently';
+            const insights = [
+                `You logged <strong>${weekMeals}</strong> meals this week.`,
+                `Your last CAF visit was <strong>${lastVisitLabel}</strong>.`,
+                `You have taken <strong>${monthMeals}</strong> meals this month.`
+            ];
+
+            insightsEl.innerHTML = insights.map(item => `<div>${item}</div>`).join('');
         }
 
         function updateRfidStatus(status, cardId) {
@@ -1588,6 +1691,7 @@
                     document.getElementById('mealsThisMonth').textContent = '0';
                     document.getElementById('mealsThisWeek').textContent = '0';
                     renderAchievements([]);
+                    renderInsights([]);
                     markLoaded('attendance');
                     return;
                 }
@@ -1609,6 +1713,7 @@
                 document.getElementById('mealsThisMonth').textContent = thisMonth.length;
                 document.getElementById('mealsThisWeek').textContent = thisWeek.length;
                 renderAchievements(attendance);
+                renderInsights(attendance);
 
                 tbody.innerHTML = attendance.map(record => {
                     const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
