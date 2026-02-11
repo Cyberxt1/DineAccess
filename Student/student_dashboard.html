@@ -82,6 +82,10 @@
             font-size: 0.95rem;
             color: #cbd5f5;
             text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .user-name {
@@ -1023,8 +1027,8 @@
                 </div>
                 <div class="header-user">
                     <div class="user-info">
-                        Welcome, <span class="user-name" id="displayName">Student</span>
-                        <div style="font-size: 0.8rem; margin-top: 0.25rem;">Level: <span id="displayLevel">100</span></div>
+                        <span>Welcome,</span> <span class="user-name" id="displayName">Student</span>
+                        <span style="font-size: 0.8rem;">Level: <span id="displayLevel">100</span></span>
                     </div>
                     <div class="header-chips">
                         <div class="header-chip"><span>🔥</span> <strong id="headerStreak">0</strong></div>
