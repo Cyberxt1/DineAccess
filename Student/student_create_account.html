@@ -457,6 +457,17 @@
                     updatedAt: serverTimestamp()
                 });
 
+                await setDoc(doc(db, 'users', user.uid), {
+                    fullName,
+                    level: parseInt(level, 10),
+                    streakDays: 0,
+                    bestStreakDays: 0,
+                    totalMeals: 0,
+                    badge: 'Caf Rookie',
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+
                 await setDoc(matricRef, {
                     uid: user.uid,
                     matricNumber,

@@ -70,5 +70,11 @@ service cloud.firestore {
         && request.resource.data.bootstrapKey == "CAF_BOOTSTRAP_2026";
       allow update, delete: if false;
     }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
   }
 }

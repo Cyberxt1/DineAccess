@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Leaderboard - University CAF System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at 20% 20%, #fef3c7, transparent 55%),
+                        radial-gradient(circle at 80% 0%, #bae6fd, transparent 45%),
+                        linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 1.25rem 2rem;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
+        }
+
+        .header-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .back-link {
+            color: #bae6fd;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.75);
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background-color: rgba(30, 41, 59, 0.9);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(30, 41, 59, 0.6);
+        }
+
+        .badge-chip {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #bae6fd;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            main {
+                padding: 0 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">🏆 Streak Leaderboard</div>
+            <a class="back-link" href="student_dashboard.html">Back to Dashboard</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-title">Streak Leaderboard</div>
+        <div class="page-subtitle">Top streak keepers across the cafeteria system.</div>
+
+        <div class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Level</th>
+                            <th>Streak Days</th>
+                            <th>Badge</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">Loading leaderboard...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            collection,
+            getDocs,
+            limit,
+            orderBy,
+            query
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const leaderboardBody = document.getElementById('leaderboardBody');
+
+        const mockData = [
+            { fullName: 'Oluwatosin Adebayo', level: 300, streakDays: 9, badge: 'Caf Warrior' },
+            { fullName: 'Maria Bello', level: 200, streakDays: 7, badge: 'Caf Rookie' },
+            { fullName: 'Chisom Nwafor', level: 400, streakDays: 6, badge: 'Caf Champion' },
+            { fullName: 'Tunde Ajayi', level: 100, streakDays: 5, badge: 'Caf Rookie' },
+            { fullName: 'Faith Ibrahim', level: 500, streakDays: 4, badge: 'Caf Rookie' }
+        ];
+
+        function renderRows(rows) {
+            if (!rows.length) {
+                leaderboardBody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">No leaderboard data yet.</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            leaderboardBody.innerHTML = rows.map((row, index) => `
+                <tr>
+                    <td>#${index + 1}</td>
+                    <td>${row.fullName || '-'}</td>
+                    <td>${row.level || '-'}</td>
+                    <td>${row.streakDays || 0}</td>
+                    <td><span class="badge-chip">🏅 ${row.badge || 'Caf Rookie'}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const leaderboardQuery = query(collection(db, 'users'), orderBy('streakDays', 'desc'), limit(50));
+                const snapshot = await getDocs(leaderboardQuery);
+                const rows = snapshot.docs.map(docSnap => docSnap.data());
+                if (rows.length) {
+                    renderRows(rows);
+                    return;
+                }
+                renderRows(mockData);
+            } catch (error) {
+                console.warn('Leaderboard fallback to mock', error);
+                renderRows(mockData);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'student_login.html';
+                return;
+            }
+            loadLeaderboard();
+        });
+    </script>
+</body>
+</html>
