@@ -191,6 +191,14 @@
             localStorage.setItem(offlineQueueKey, JSON.stringify(queue));
         }
 
+        function isQueuedDuplicate(queue, studentId, sessionId, dateKey) {
+            return queue.some(entry =>
+                entry.studentId === studentId &&
+                entry.mealLog?.mealSessionId === sessionId &&
+                entry.mealLog?.dateKey === dateKey
+            );
+        }
+
         async function syncQueue() {
             const queue = getQueue();
             if (queue.length === 0 || !navigator.onLine) {
@@ -348,6 +356,12 @@
             } catch (error) {
                 const offlineTimestamp = new Date().toISOString();
                 const queue = getQueue();
+                if (isQueuedDuplicate(queue, studentId, sessionId, todayKey)) {
+                    matricInput.value = '';
+                    matricInput.focus();
+                    showStatus('Meal already queued for this session today.', 'error');
+                    return;
+                }
                 queue.push({
                     studentId,
                     mealLog: { ...mealLog, timestamp: offlineTimestamp },

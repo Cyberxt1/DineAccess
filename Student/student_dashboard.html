@@ -1458,7 +1458,12 @@
                 return;
             }
 
+            const cutoff = new Date(Date.now() - 5 * 60 * 60 * 1000);
             const filtered = updatesData.filter(update => {
+                const ts = parseTimestamp(update.createdAt);
+                if (!ts || ts < cutoff) {
+                    return false;
+                }
                 if (update.audience === 'department') {
                     return update.department && update.department === studentData.department;
                 }
