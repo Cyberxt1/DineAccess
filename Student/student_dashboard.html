@@ -85,7 +85,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            flex-wrap: wrap;
+            white-space: nowrap;
         }
 
         .user-name {
@@ -1027,8 +1027,7 @@
                 </div>
                 <div class="header-user">
                     <div class="user-info">
-                        <span>Welcome,</span> <span class="user-name" id="displayName">Student</span>
-                        <span style="font-size: 0.8rem;">Level: <span id="displayLevel">100</span></span>
+                        <span>Hi,</span> <span class="user-name" id="displayName">Student</span>
                     </div>
                     <div class="header-chips">
                         <div class="header-chip"><span>🔥</span> <strong id="headerStreak">0</strong></div>
@@ -1552,7 +1551,7 @@
             document.getElementById('levelHint').textContent = `${progress} / ${levelStep} meals`;
 
             const badges = [
-                { name: 'Caf Rookie', threshold: 5 },
+                { name: 'Caf Rookie', threshold: 1 },
                 { name: 'Caf Warrior', threshold: 15 },
                 { name: 'Caf Champion', threshold: 30 },
                 { name: 'Caf Legend', threshold: 50 }
