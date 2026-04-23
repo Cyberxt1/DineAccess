@@ -353,6 +353,41 @@
             color: var(--color-text-secondary);
         }
 
+        .button-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .weekly-plan-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .weekly-plan-row {
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            padding: 14px;
+            background: rgba(15, 23, 42, 0.08);
+            display: grid;
+            gap: 10px;
+        }
+
+        .weekly-plan-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .weekly-plan-meta {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
         .barcode-preview-surface {
             background: #ffffff;
             border-radius: 16px;
@@ -1101,7 +1136,10 @@
                         <div class="page-title" style="font-size: 20px; margin-bottom: 4px;">Meal Planner</div>
                         <div class="section-copy">Publish menus by date and meal session so students can see what will be served.</div>
                     </div>
-                    <button class="btn" onclick="openMealPlanModal()">Add Meal Plan</button>
+                    <div class="button-row">
+                        <button class="btn btn-secondary" onclick="openWeeklyMealPlanModal()">Set Weekly Plan</button>
+                        <button class="btn" onclick="openMealPlanModal()">Add Meal Plan</button>
+                    </div>
                 </div>
 
                 <div class="table-container">
@@ -1120,7 +1158,7 @@
                             <tr>
                                 <td colspan="6">
                                     <div class="empty-state">
-                                        <div class="empty-state-icon">ðŸ½ï¸</div>
+                                        <div class="empty-state-icon">Menu</div>
                                         <div class="empty-state-title">No meal plans yet</div>
                                         <p>Published menus will appear here.</p>
                                     </div>
@@ -1387,7 +1425,7 @@
     </div>
     <div id="mealPlanModal" class="modal">
         <div class="modal-content" style="background-color: #a7aba9;">
-            <button class="modal-close" onclick="closeMealPlanModal()">Ã—</button>
+            <button class="modal-close" onclick="closeMealPlanModal()">&times;</button>
             <div class="modal-title" id="mealPlanModalTitle">Add Meal Plan</div>
 
             <form id="mealPlanForm" onsubmit="handleSaveMealPlan(event)">
@@ -1430,6 +1468,43 @@
                 <div style="display: flex; gap: 12px;">
                     <button type="submit" class="btn">Save Meal Plan</button>
                     <button type="button" class="btn btn-secondary" onclick="closeMealPlanModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="weeklyMealPlanModal" class="modal">
+        <div class="modal-content" style="background-color: #a7aba9; max-width: 960px;">
+            <button class="modal-close" onclick="closeWeeklyMealPlanModal()">&times;</button>
+            <div class="modal-title">Set Weekly Meal Plan</div>
+            <form id="weeklyMealPlanForm" onsubmit="handleSaveWeeklyMealPlan(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weeklyPlanStartDate">Week Start</label>
+                        <input type="date" id="weeklyPlanStartDate" required onchange="renderWeeklyMealPlanGrid()">
+                    </div>
+                    <div class="form-group">
+                        <label for="weeklyPlanCAF">CAF</label>
+                        <select id="weeklyPlanCAF" onchange="renderWeeklyMealPlanGrid()"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weeklyPlanStatus">Status</label>
+                        <select id="weeklyPlanStatus" required>
+                            <option value="Published">Published</option>
+                            <option value="Hidden">Hidden</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sessions Used</label>
+                        <input type="text" id="weeklyPlanSessionsInfo" readonly>
+                    </div>
+                </div>
+                <div class="section-copy">Fill only the rows you want to publish. Matching plans for the same day and session will be updated automatically.</div>
+                <div class="weekly-plan-grid" id="weeklyMealPlanGrid"></div>
+                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                    <button type="submit" class="btn">Save Weekly Plan</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeWeeklyMealPlanModal()">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1836,6 +1911,99 @@
             return [];
         }
 
+        function getWeeklyPlannerSessions() {
+            const activeSessions = mealSessionsData
+                .filter(session => (session.status || 'Active') !== 'Inactive');
+            const lunchDinnerSessions = activeSessions.filter(session => {
+                const name = String(session.name || '').toLowerCase();
+                return name.includes('lunch') || name.includes('dinner');
+            });
+            return lunchDinnerSessions.length ? lunchDinnerSessions : activeSessions;
+        }
+
+        function getWeekDates(startDate) {
+            if (!startDate) {
+                return [];
+            }
+            const base = new Date(`${startDate}T00:00:00`);
+            if (Number.isNaN(base.getTime())) {
+                return [];
+            }
+
+            return Array.from({ length: 7 }, (_, index) => {
+                const current = new Date(base);
+                current.setDate(base.getDate() + index);
+                return current.toISOString().slice(0, 10);
+            });
+        }
+
+        function populateWeeklyMealPlanCAFOptions() {
+            const cafSelect = document.getElementById('weeklyPlanCAF');
+            if (!cafSelect) {
+                return;
+            }
+
+            cafSelect.innerHTML = '<option value="">All CAFs</option>';
+            cachedCafs.forEach(caf => {
+                const option = document.createElement('option');
+                option.value = caf.id;
+                option.textContent = caf.name || 'CAF';
+                cafSelect.appendChild(option);
+            });
+        }
+
+        function renderWeeklyMealPlanGrid() {
+            const grid = document.getElementById('weeklyMealPlanGrid');
+            const sessionsInfo = document.getElementById('weeklyPlanSessionsInfo');
+            const weekStart = document.getElementById('weeklyPlanStartDate')?.value;
+            const selectedCafId = document.getElementById('weeklyPlanCAF')?.value || '';
+            if (!grid || !sessionsInfo) {
+                return;
+            }
+
+            const sessions = getWeeklyPlannerSessions();
+            sessionsInfo.value = sessions.map(session => session.name || 'Session').join(', ') || 'No active sessions';
+
+            if (!weekStart || !sessions.length) {
+                grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">Menu</div><div class="empty-state-title">No weekly rows available</div><p>${sessions.length ? 'Select a week start date to continue.' : 'Create active Lunch and Dinner sessions first.'}</p></div>`;
+                return;
+            }
+
+            const weekDates = getWeekDates(weekStart);
+            grid.innerHTML = weekDates.map(serviceDate => {
+                return sessions.map(session => {
+                    const existingPlan = mealPlansData.find(plan =>
+                        plan.serviceDate === serviceDate &&
+                        plan.sessionId === session.id &&
+                        (plan.cafId || '') === selectedCafId
+                    );
+                    return `
+                        <div class="weekly-plan-row">
+                            <div class="weekly-plan-label">${formatServiceDate(serviceDate)} - ${session.name || 'Session'}</div>
+                            <div class="weekly-plan-meta">${session.startTime || '--'} - ${session.endTime || '--'}</div>
+                            <input type="hidden" data-field="service-date" value="${serviceDate}">
+                            <input type="hidden" data-field="session-id" value="${session.id}">
+                            <input type="hidden" data-field="plan-id" value="${existingPlan?.id || ''}">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Meal Title</label>
+                                <input type="text" data-field="meal-name" value="${existingPlan?.mealName || ''}" placeholder="e.g. Rice and Stew">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Menu Items</label>
+                                <textarea rows="3" data-field="menu-items" placeholder="Comma separated or one per line">${normalizeMenuItems(existingPlan?.menuItems).join('\n')}</textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Note</label>
+                                <input type="text" data-field="note" value="${existingPlan?.note || ''}" placeholder="Optional note">
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }).join('');
+        }
+
+        window.renderWeeklyMealPlanGrid = renderWeeklyMealPlanGrid;
+
         function populateMealPlanFormOptions() {
             const sessionSelect = document.getElementById('mealPlanSession');
             const cafSelect = document.getElementById('mealPlanCAF');
@@ -1873,7 +2041,7 @@
             }
 
             if (mealPlansData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">ðŸ½ï¸</div><div class="empty-state-title">No meal plans yet</div><p>Published menus will appear here.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">Menu</div><div class="empty-state-title">No meal plans yet</div><p>Published menus will appear here.</p></div></td></tr>`;
                 return;
             }
 
@@ -2338,6 +2506,8 @@
                 renderTerminalsTable();
                 renderMealLogsTable();
                 populateMealPlanFormOptions();
+                populateWeeklyMealPlanCAFOptions();
+                renderWeeklyMealPlanGrid();
                 renderAnalytics();
                 updateDashboard();
                 markLoaded('cafs');
@@ -2384,6 +2554,7 @@
                 mealSessionsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderMealSessionsTable();
                 populateMealPlanFormOptions();
+                renderWeeklyMealPlanGrid();
                 renderAnalytics();
                 markLoaded('mealSessions');
             }, (error) => {
@@ -2395,6 +2566,7 @@
             unsubscribers.push(onSnapshot(collection(db, 'mealPlans'), (snapshot) => {
                 mealPlansData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderMealPlansTable();
+                renderWeeklyMealPlanGrid();
                 markLoaded('mealPlans');
             }, (error) => {
                 console.error(error);
@@ -2682,6 +2854,24 @@
             document.getElementById('mealPlanModal').classList.remove('active');
         };
 
+        window.openWeeklyMealPlanModal = function() {
+            populateWeeklyMealPlanCAFOptions();
+            const startInput = document.getElementById('weeklyPlanStartDate');
+            const statusInput = document.getElementById('weeklyPlanStatus');
+            if (startInput && !startInput.value) {
+                startInput.value = new Date().toISOString().slice(0, 10);
+            }
+            if (statusInput) {
+                statusInput.value = 'Published';
+            }
+            renderWeeklyMealPlanGrid();
+            document.getElementById('weeklyMealPlanModal').classList.add('active');
+        };
+
+        window.closeWeeklyMealPlanModal = function() {
+            document.getElementById('weeklyMealPlanModal').classList.remove('active');
+        };
+
         window.editMealPlan = function(planId) {
             const plan = mealPlansData.find(item => item.id === planId);
             if (!plan) {
@@ -2768,6 +2958,90 @@
             } catch (error) {
                 console.error(error);
                 showToast('Could not save the meal plan.', 'error', 'Meal Plan');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        window.handleSaveWeeklyMealPlan = async function(e) {
+            e.preventDefault();
+
+            const weekStart = document.getElementById('weeklyPlanStartDate').value;
+            const cafId = document.getElementById('weeklyPlanCAF').value;
+            const status = document.getElementById('weeklyPlanStatus').value;
+            const selectedCaf = cachedCafs.find(caf => caf.id === cafId);
+            const rows = Array.from(document.querySelectorAll('#weeklyMealPlanGrid .weekly-plan-row'));
+
+            if (!weekStart) {
+                showToast('Select the start date for the week.', 'warning', 'Meal Plan');
+                return;
+            }
+
+            const payloads = rows.map(row => {
+                const planId = row.querySelector('[data-field="plan-id"]')?.value || '';
+                const serviceDate = row.querySelector('[data-field="service-date"]')?.value || '';
+                const sessionId = row.querySelector('[data-field="session-id"]')?.value || '';
+                const mealName = row.querySelector('[data-field="meal-name"]')?.value.trim() || '';
+                const menuItems = normalizeMenuItems(row.querySelector('[data-field="menu-items"]')?.value || '');
+                const note = row.querySelector('[data-field="note"]')?.value.trim() || '';
+                const selectedSession = mealSessionsData.find(session => session.id === sessionId);
+
+                if (!selectedSession || (!mealName && menuItems.length === 0 && !note)) {
+                    return null;
+                }
+
+                return {
+                    planId,
+                    payload: {
+                        serviceDate,
+                        sessionId,
+                        sessionName: selectedSession.name || 'Session',
+                        startTime: selectedSession.startTime || '',
+                        endTime: selectedSession.endTime || '',
+                        cafId: cafId || '',
+                        cafName: selectedCaf?.name || '',
+                        mealName,
+                        menuItems,
+                        note,
+                        status,
+                        updatedAt: serverTimestamp()
+                    }
+                };
+            }).filter(Boolean);
+
+            if (!payloads.length) {
+                showToast('Add at least one meal entry for the week.', 'warning', 'Meal Plan');
+                return;
+            }
+
+            try {
+                setLoading(true, 'Saving weekly meal plan...');
+                for (const item of payloads) {
+                    if (item.planId) {
+                        await updateDoc(doc(db, 'mealPlans', item.planId), item.payload);
+                        continue;
+                    }
+
+                    const existingPlan = mealPlansData.find(plan =>
+                        plan.serviceDate === item.payload.serviceDate &&
+                        plan.sessionId === item.payload.sessionId &&
+                        (plan.cafId || '') === (item.payload.cafId || '')
+                    );
+
+                    if (existingPlan) {
+                        await updateDoc(doc(db, 'mealPlans', existingPlan.id), item.payload);
+                    } else {
+                        await addDoc(collection(db, 'mealPlans'), {
+                            ...item.payload,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                }
+                closeWeeklyMealPlanModal();
+                showToast('Weekly meal plan saved.', 'success', 'Meal Plan');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not save the weekly meal plan.', 'error', 'Meal Plan');
             } finally {
                 setLoading(false);
             }
