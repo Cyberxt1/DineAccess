@@ -364,9 +364,103 @@
             gap: 0.75rem;
         }
 
+        .barcode-surface,
+        .barcode-modal-surface {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 132px;
+        }
+
+        .barcode-surface svg,
+        .barcode-modal-surface svg {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+        }
+
         .barcode-matric {
             font-size: 0.9rem;
-            color: #6b7280;
+            color: #cbd5f5;
+            text-align: center;
+        }
+
+        .rfid-card-id {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            padding: 0.7rem 0.9rem;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .meal-plan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .meal-plan-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            padding: 1rem;
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .meal-plan-card.is-today {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+        }
+
+        .meal-plan-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .meal-plan-date {
+            font-size: 0.95rem;
+            color: #f8fafc;
+            font-weight: 700;
+        }
+
+        .meal-plan-session {
+            font-size: 0.78rem;
+            color: #38bdf8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .meal-plan-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .meal-plan-meta,
+        .meal-plan-note,
+        .meal-plan-summary {
+            font-size: 0.9rem;
+            color: #cbd5f5;
+        }
+
+        .meal-plan-meta strong,
+        .meal-plan-note strong {
+            color: #f8fafc;
         }
 
         .attendance-section {
@@ -1030,6 +1124,7 @@
                         <span>Hi,</span> <span class="user-name" id="displayName">Foodie</span>
                     </div>
                     <div class="header-chips">
+                        <div class="header-chip">Level <strong id="displayLevel">100</strong></div>
                         <div class="header-chip"><span>🔥</span> <strong id="headerStreak">0</strong></div>
                         <div class="header-chip"><span>🏅</span> <span id="headerBadge">Caf Ranger</span></div>
                         <a class="header-chip" href="leaderboard.html">🏆 Leaderboard</a>
@@ -1038,6 +1133,7 @@
             </div>
             <div class="nav-links" id="studentNav">
                 <a href="#overview">Overview</a>
+                <a href="#meal-plan">Meal Plan</a>
                 <a href="#updates">Updates</a>
                 <a href="#attendance">Attendance</a>
                 <button class="logout-btn" onclick="handleLogout()">Logout</button>
@@ -1074,19 +1170,23 @@
             </div>
 
             <div class="card">
-                <div class="card-title">RFID Status</div>
+                <div class="card-title">RFID Access</div>
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
                     <span class="badge badge-none" id="rfidStatusBadge">Not Requested</span>
                     <button class="quick-action" id="rfidRequestBtn" onclick="openModal('rfidModal')">Request RFID</button>
                 </div>
-                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: #6b7280;" id="rfidStatusNote">Submit your request to get an RFID card.</div>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: #cbd5f5;" id="rfidStatusNote">Submit your request to get an RFID card.</div>
+                <div class="rfid-card-id" id="rfidCardValue">Card ID: Not assigned yet</div>
             </div>
 
             <div class="card">
                 <div class="card-title">Your Barcode</div>
                 <div class="barcode-wrap">
-                    <svg id="studentBarcode"></svg>
+                    <div class="barcode-surface">
+                        <svg id="studentBarcode"></svg>
+                    </div>
                     <div class="barcode-matric" id="barcodeMatric">Matric: --</div>
+                    <button type="button" class="quick-action secondary" onclick="openModal('barcodeModal')">Open Barcode</button>
                 </div>
             </div>
 
@@ -1154,6 +1254,17 @@
                 <div class="card-title">Smart Insights</div>
                 <div id="smartInsights" style="display: grid; gap: 0.6rem; font-size: 0.9rem; color: #cbd5f5;">
                     <div>Loading insights...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="updates-section" id="meal-plan">
+            <div class="section-title">What's Cooking</div>
+            <div class="meal-plan-summary" id="mealPlanSummary">Loading this week's meal plan...</div>
+            <div class="meal-plan-grid" id="mealPlanList">
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="empty-state-icon">ðŸ½ï¸</div>
+                    <div>Meal plan will appear here once published.</div>
                 </div>
             </div>
         </div>
@@ -1264,6 +1375,17 @@
         </div>
     </div>
 
+    <div class="modal" id="barcodeModal">
+        <div class="modal-content" style="position: relative; max-width: 560px;">
+            <button class="modal-close" onclick="closeModal('barcodeModal')">&times;</button>
+            <div class="modal-title">Student Barcode</div>
+            <div class="barcode-modal-surface">
+                <svg id="studentBarcodeModal"></svg>
+            </div>
+            <div class="barcode-matric" id="barcodeMatricModal" style="margin-top: 1rem;">Matric: --</div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toastContainer"></div>
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -1307,8 +1429,10 @@
         let unsubscribeStudent = null;
         let unsubscribeAttendance = null;
         let unsubscribeUpdates = null;
+        let unsubscribeMealPlans = null;
         let pendingLoads = new Set();
         let updatesData = [];
+        let mealPlansData = [];
 
         const toastContainer = document.getElementById('toastContainer');
         const loadingOverlay = document.getElementById('loadingOverlay');
@@ -1321,6 +1445,8 @@
         const emailToggle = document.getElementById('emailUpdatesToggle');
         const emailLabel = document.getElementById('emailUpdatesLabel');
         const updatesList = document.getElementById('studentUpdatesList');
+        const mealPlanList = document.getElementById('mealPlanList');
+        const mealPlanSummary = document.getElementById('mealPlanSummary');
         let alertResolver = null;
 
         function showToast(message, type = 'info', title = 'Update') {
@@ -1346,7 +1472,7 @@
         }
 
         function initRealtimeLoading() {
-            pendingLoads = new Set(['student', 'attendance']);
+            pendingLoads = new Set(['student', 'attendance', 'mealPlans']);
             setLoading(true, 'Syncing your dashboard...');
             setTimeout(() => {
                 if (pendingLoads.size > 0) {
@@ -1420,18 +1546,40 @@
             });
         });
 
-        function renderBarcode(matricNumber) {
-            if (!matricNumber) {
+        function drawBarcode(selector, value, height = 78) {
+            const target = document.querySelector(selector);
+            if (!target) {
                 return;
             }
-            JsBarcode("#studentBarcode", matricNumber, {
-                format: "CODE128",
-                lineColor: "#111827",
-                width: 2,
-                height: 70,
-                displayValue: false
-            });
-            document.getElementById('barcodeMatric').textContent = `Matric: ${matricNumber}`;
+
+            if (!value) {
+                target.innerHTML = '';
+                return;
+            }
+
+            try {
+                JsBarcode(target, value, {
+                    format: "CODE128",
+                    lineColor: "#0f172a",
+                    background: "#ffffff",
+                    width: 2,
+                    height,
+                    displayValue: true,
+                    fontSize: 16,
+                    margin: 10
+                });
+            } catch (error) {
+                console.error('Barcode render failed', error);
+                target.innerHTML = '';
+            }
+        }
+
+        function renderBarcode(matricNumber) {
+            const displayValue = matricNumber || '--';
+            document.getElementById('barcodeMatric').textContent = `Matric: ${displayValue}`;
+            document.getElementById('barcodeMatricModal').textContent = `Matric: ${displayValue}`;
+            drawBarcode('#studentBarcode', matricNumber);
+            drawBarcode('#studentBarcodeModal', matricNumber, 96);
         }
 
         function parseTimestamp(value) {
@@ -1492,6 +1640,89 @@
                         <div class="update-meta">${timeLabel}</div>
                         <div class="update-message">${update.message || ''}</div>
                     </div>
+                `;
+            }).join('');
+        }
+
+        function formatServiceDate(serviceDate) {
+            if (!serviceDate) {
+                return 'Date not set';
+            }
+            const parsedDate = new Date(`${serviceDate}T00:00:00`);
+            return Number.isNaN(parsedDate.getTime())
+                ? serviceDate
+                : parsedDate.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function normalizeMenuItems(menuItems) {
+            if (Array.isArray(menuItems)) {
+                return menuItems.filter(Boolean);
+            }
+            if (typeof menuItems === 'string') {
+                return menuItems
+                    .split(/\r?\n|,/)
+                    .map(item => item.trim())
+                    .filter(Boolean);
+            }
+            return [];
+        }
+
+        function renderMealPlans() {
+            if (!mealPlanList || !mealPlanSummary) {
+                return;
+            }
+
+            const todayKey = new Date().toISOString().slice(0, 10);
+            const upcomingPlans = [...mealPlansData]
+                .filter(plan => {
+                    const status = String(plan.status || 'Published').toLowerCase();
+                    return status === 'published' && plan.serviceDate && plan.serviceDate >= todayKey;
+                })
+                .sort((a, b) => {
+                    const dateCompare = String(a.serviceDate || '').localeCompare(String(b.serviceDate || ''));
+                    if (dateCompare !== 0) {
+                        return dateCompare;
+                    }
+                    return String(a.startTime || '').localeCompare(String(b.startTime || ''));
+                })
+                .slice(0, 8);
+
+            if (!upcomingPlans.length) {
+                mealPlanSummary.textContent = 'No meal plan has been published for the upcoming days yet.';
+                mealPlanList.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon">ðŸ½ï¸</div>
+                        <div>Meal plan will appear here once the CAF publishes it.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const nextPlan = upcomingPlans[0];
+            mealPlanSummary.textContent = `Next service: ${formatServiceDate(nextPlan.serviceDate)} for ${nextPlan.sessionName || 'Meal Session'}.`;
+
+            mealPlanList.innerHTML = upcomingPlans.map(plan => {
+                const isToday = plan.serviceDate === todayKey;
+                const sessionLabel = plan.sessionName || 'Meal Session';
+                const serviceTime = plan.startTime && plan.endTime
+                    ? `${plan.startTime} - ${plan.endTime}`
+                    : plan.startTime || plan.endTime || 'Time to be announced';
+                const menuItems = normalizeMenuItems(plan.menuItems);
+                const menuLine = menuItems.length ? menuItems.join(', ') : 'Menu details will be announced.';
+                return `
+                    <article class="meal-plan-card ${isToday ? 'is-today' : ''}">
+                        <div class="meal-plan-top">
+                            <div>
+                                <div class="meal-plan-date">${isToday ? 'Today' : formatServiceDate(plan.serviceDate)}</div>
+                                <div class="meal-plan-session">${sessionLabel}</div>
+                            </div>
+                            <span class="badge badge-approved">${plan.cafName || 'All CAFs'}</span>
+                        </div>
+                        <div class="meal-plan-title">${plan.mealName || sessionLabel}</div>
+                        <div class="meal-plan-meta"><strong>Time:</strong> ${serviceTime}</div>
+                        <div class="meal-plan-meta"><strong>Menu:</strong> ${menuLine}</div>
+                        <div class="meal-plan-note"><strong>Note:</strong> ${plan.note || 'No extra notes for this service.'}</div>
+                    </article>
                 `;
             }).join('');
         }
@@ -1658,29 +1889,34 @@
             const badge = document.getElementById('rfidStatusBadge');
             const note = document.getElementById('rfidStatusNote');
             const button = document.getElementById('rfidRequestBtn');
+            const cardValue = document.getElementById('rfidCardValue');
 
             if (status === 'approved') {
                 badge.className = 'badge badge-approved';
                 badge.textContent = 'Approved';
                 note.textContent = cardId ? `RFID Card: ${cardId}` : 'Your RFID request is approved.';
+                cardValue.textContent = cardId ? `Card ID: ${cardId}` : 'Card ID: Assigned soon';
                 button.disabled = true;
                 button.textContent = 'Approved';
             } else if (status === 'pending') {
                 badge.className = 'badge badge-pending';
                 badge.textContent = 'Pending';
                 note.textContent = 'Your request is being reviewed.';
+                cardValue.textContent = 'Card ID: Pending approval';
                 button.disabled = true;
                 button.textContent = 'Pending';
             } else if (status === 'rejected') {
                 badge.className = 'badge badge-none';
                 badge.textContent = 'Rejected';
                 note.textContent = 'Your request was rejected. You may request again.';
+                cardValue.textContent = 'Card ID: Not assigned';
                 button.disabled = false;
                 button.textContent = 'Request RFID';
             } else {
                 badge.className = 'badge badge-none';
                 badge.textContent = 'Not Requested';
                 note.textContent = 'Submit your request to get an RFID card.';
+                cardValue.textContent = 'Card ID: Not assigned';
                 button.disabled = false;
                 button.textContent = 'Request RFID';
             }
@@ -1729,6 +1965,25 @@
             return onSnapshot(updatesQuery, (snapshot) => {
                 updatesData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderStudentUpdates();
+            });
+        }
+
+        function listenToMealPlans() {
+            const plansQuery = query(collection(db, 'mealPlans'), orderBy('serviceDate'), limit(40));
+            return onSnapshot(plansQuery, (snapshot) => {
+                mealPlansData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderMealPlans();
+                markLoaded('mealPlans');
+            }, (error) => {
+                console.error(error);
+                mealPlanSummary.textContent = 'Meal plan could not be loaded right now.';
+                mealPlanList.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon">ðŸ½ï¸</div>
+                        <div>Meal plan is temporarily unavailable.</div>
+                    </div>
+                `;
+                markLoaded('mealPlans');
             });
         }
 
@@ -1787,7 +2042,7 @@
                     return `
                         <tr>
                             <td data-label="Date">${displayDate}</td>
-                            <td data-label="Meal Type">${record.mealType || 'Standard'}</td>
+                            <td data-label="Meal Type">${record.mealType || record.mealSessionName || 'Meal Service'}</td>
                             <td data-label="Time">${displayTime}</td>
                             <td data-label="Status">
                                 <span class="status-badge attended">✓ Attended</span>
@@ -1917,6 +2172,10 @@
                 unsubscribeUpdates();
             }
             unsubscribeUpdates = listenToUpdates();
+            if (unsubscribeMealPlans) {
+                unsubscribeMealPlans();
+            }
+            unsubscribeMealPlans = listenToMealPlans();
 
             if (emailToggle) {
                 emailToggle.addEventListener('change', async () => {

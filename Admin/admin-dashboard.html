@@ -339,6 +339,30 @@
             min-width: 220px;
         }
 
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 16px;
+            flex-wrap: wrap;
+        }
+
+        .section-copy {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+
+        .barcode-preview-surface {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 140px;
+        }
+
         .analysis-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1042,7 +1066,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <div>
                         <div class="page-title">Meal Sessions</div>
-                        <div class="page-subtitle">Manage meal service periods</div>
+                        <div class="page-subtitle">Manage meal service periods and publish what students should expect for each day.</div>
                     </div>
                     <button class="btn" onclick="openMealSessionModal()">Add Meal Session</button>
                 </div>
@@ -1065,6 +1089,40 @@
                                         <div class="empty-state-icon">⏰</div>
                                         <div class="empty-state-title">No meal sessions</div>
                                         <p>Meal sessions will appear here</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section-header">
+                    <div>
+                        <div class="page-title" style="font-size: 20px; margin-bottom: 4px;">Meal Planner</div>
+                        <div class="section-copy">Publish menus by date and meal session so students can see what will be served.</div>
+                    </div>
+                    <button class="btn" onclick="openMealPlanModal()">Add Meal Plan</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Session</th>
+                                <th>Meal</th>
+                                <th>Menu</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mealPlansTable">
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">ðŸ½ï¸</div>
+                                        <div class="empty-state-title">No meal plans yet</div>
+                                        <p>Published menus will appear here.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -1327,14 +1385,63 @@
             </form>
         </div>
     </div>
+    <div id="mealPlanModal" class="modal">
+        <div class="modal-content" style="background-color: #a7aba9;">
+            <button class="modal-close" onclick="closeMealPlanModal()">Ã—</button>
+            <div class="modal-title" id="mealPlanModalTitle">Add Meal Plan</div>
+
+            <form id="mealPlanForm" onsubmit="handleSaveMealPlan(event)">
+                <input type="hidden" id="mealPlanId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mealPlanDate">Service Date</label>
+                        <input type="date" id="mealPlanDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mealPlanStatus">Status</label>
+                        <select id="mealPlanStatus" required>
+                            <option value="Published">Published</option>
+                            <option value="Hidden">Hidden</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mealPlanSession">Meal Session</label>
+                        <select id="mealPlanSession" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mealPlanCAF">CAF</label>
+                        <select id="mealPlanCAF"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="mealPlanTitle">Meal Title</label>
+                    <input type="text" id="mealPlanTitle" required placeholder="e.g. Jollof Rice and Chicken">
+                </div>
+                <div class="form-group">
+                    <label for="mealPlanItems">Menu Items</label>
+                    <textarea id="mealPlanItems" rows="4" placeholder="Enter items separated by commas or new lines"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="mealPlanNote">Extra Note</label>
+                    <textarea id="mealPlanNote" rows="3" placeholder="Optional note for students"></textarea>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn">Save Meal Plan</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeMealPlanModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div id="barcodeModal" class="modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeBarcodeModal()">×</button>
             <div class="modal-title">Student Barcode</div>
-            <div style="text-align: center;">
+            <div class="barcode-preview-surface">
                 <svg id="adminBarcode"></svg>
-                <div style="margin-top: 12px; font-size: 14px; color: var(--color-text-secondary);" id="barcodeLabel">Matric: --</div>
             </div>
+            <div style="margin-top: 12px; font-size: 14px; color: var(--color-text-secondary); text-align: center;" id="barcodeLabel">Matric: --</div>
         </div>
     </div>
     <script type="module">
@@ -1361,6 +1468,7 @@
         let mealLogsData = [];
         let rfidRequestsData = [];
         let mealSessionsData = [];
+        let mealPlansData = [];
         let feedbackData = [];
         let updatesData = [];
         let studentSearchTerm = '';
@@ -1403,7 +1511,7 @@
         }
 
         function initRealtimeLoading() {
-            pendingLoads = new Set(['students', 'cafs', 'terminals', 'mealLogs', 'rfidRequests', 'mealSessions', 'feedback', 'updates']);
+            pendingLoads = new Set(['students', 'cafs', 'terminals', 'mealLogs', 'rfidRequests', 'mealSessions', 'mealPlans', 'feedback', 'updates']);
             setLoading(true, 'Syncing live data...');
         }
 
@@ -1502,6 +1610,7 @@
                 renderRfidRequestsTable();
             } else if (page === 'meal-sessions') {
                 renderMealSessionsTable();
+                renderMealPlansTable();
             } else if (page === 'updates') {
                 renderUpdatesList();
             } else if (page === 'leaderboards') {
@@ -1698,6 +1807,101 @@
                         <td>
                             <button class="btn btn-small" onclick="editMealSession('${session.id}')">Edit</button>
                             <button class="btn btn-secondary btn-small" onclick="deleteMealSession('${session.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function formatServiceDate(serviceDate) {
+            if (!serviceDate) {
+                return '-';
+            }
+            const parsedDate = new Date(`${serviceDate}T00:00:00`);
+            return Number.isNaN(parsedDate.getTime())
+                ? serviceDate
+                : parsedDate.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function normalizeMenuItems(menuItems) {
+            if (Array.isArray(menuItems)) {
+                return menuItems.filter(Boolean);
+            }
+            if (typeof menuItems === 'string') {
+                return menuItems
+                    .split(/\r?\n|,/)
+                    .map(item => item.trim())
+                    .filter(Boolean);
+            }
+            return [];
+        }
+
+        function populateMealPlanFormOptions() {
+            const sessionSelect = document.getElementById('mealPlanSession');
+            const cafSelect = document.getElementById('mealPlanCAF');
+            if (!sessionSelect || !cafSelect) {
+                return;
+            }
+
+            const activeSessions = mealSessionsData
+                .filter(session => (session.status || 'Active') !== 'Inactive')
+                .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+            sessionSelect.innerHTML = activeSessions.length
+                ? '<option value="">Select meal session</option>'
+                : '<option value="">No meal sessions available</option>';
+            activeSessions.forEach(session => {
+                const option = document.createElement('option');
+                option.value = session.id;
+                option.textContent = `${session.name || 'Session'} (${session.startTime || '--'} - ${session.endTime || '--'})`;
+                sessionSelect.appendChild(option);
+            });
+
+            cafSelect.innerHTML = '<option value="">All CAFs</option>';
+            cachedCafs.forEach(caf => {
+                const option = document.createElement('option');
+                option.value = caf.id;
+                option.textContent = caf.name || 'CAF';
+                cafSelect.appendChild(option);
+            });
+        }
+
+        function renderMealPlansTable() {
+            const tbody = document.getElementById('mealPlansTable');
+            if (!tbody) {
+                return;
+            }
+
+            if (mealPlansData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">ðŸ½ï¸</div><div class="empty-state-title">No meal plans yet</div><p>Published menus will appear here.</p></div></td></tr>`;
+                return;
+            }
+
+            const sorted = [...mealPlansData].sort((a, b) => {
+                const dateCompare = String(a.serviceDate || '').localeCompare(String(b.serviceDate || ''));
+                if (dateCompare !== 0) {
+                    return dateCompare;
+                }
+                return String(a.startTime || '').localeCompare(String(b.startTime || ''));
+            });
+
+            tbody.innerHTML = sorted.map(plan => {
+                const status = plan.status || 'Published';
+                const badgeClass = status === 'Published' ? 'badge-info' : 'badge-neutral';
+                const menuItems = normalizeMenuItems(plan.menuItems);
+                const menuText = menuItems.length ? menuItems.join(', ') : (plan.note || '-');
+                const toggleLabel = status === 'Published' ? 'Hide' : 'Publish';
+                const toggleStatus = status === 'Published' ? 'Hidden' : 'Published';
+                return `
+                    <tr>
+                        <td>${formatServiceDate(plan.serviceDate)}</td>
+                        <td>${plan.sessionName || '-'}</td>
+                        <td>${plan.mealName || '-'}</td>
+                        <td>${menuText}</td>
+                        <td><span class="badge ${badgeClass}">${status}</span></td>
+                        <td>
+                            <button class="btn btn-small" onclick="editMealPlan('${plan.id}')">Edit</button>
+                            <button class="btn btn-secondary btn-small" onclick="toggleMealPlanStatus('${plan.id}', '${toggleStatus}')">${toggleLabel}</button>
                         </td>
                     </tr>
                 `;
@@ -2133,6 +2337,7 @@
                 renderCafsTable();
                 renderTerminalsTable();
                 renderMealLogsTable();
+                populateMealPlanFormOptions();
                 renderAnalytics();
                 updateDashboard();
                 markLoaded('cafs');
@@ -2178,12 +2383,23 @@
             unsubscribers.push(onSnapshot(collection(db, 'mealSessions'), (snapshot) => {
                 mealSessionsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderMealSessionsTable();
+                populateMealPlanFormOptions();
                 renderAnalytics();
                 markLoaded('mealSessions');
             }, (error) => {
                 console.error(error);
                 showToast('Failed to load meal sessions.', 'error', 'Sync');
                 markLoaded('mealSessions');
+            }));
+
+            unsubscribers.push(onSnapshot(collection(db, 'mealPlans'), (snapshot) => {
+                mealPlansData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderMealPlansTable();
+                markLoaded('mealPlans');
+            }, (error) => {
+                console.error(error);
+                showToast('Failed to load meal plans.', 'error', 'Sync');
+                markLoaded('mealPlans');
             }));
 
             unsubscribers.push(onSnapshot(collection(db, 'feedback'), (snapshot) => {
@@ -2440,6 +2656,7 @@
                 }
                 closeMealSessionModal();
                 renderMealSessionsTable();
+                populateMealPlanFormOptions();
                 showToast('Meal session saved.', 'success', 'Meal Session');
             } catch (error) {
                 console.error(error);
@@ -2448,6 +2665,114 @@
                 setLoading(false);
             }
         };
+
+        window.openMealPlanModal = function(keepData = false) {
+            populateMealPlanFormOptions();
+            document.getElementById('mealPlanModal').classList.add('active');
+            if (!keepData) {
+                document.getElementById('mealPlanForm').reset();
+                document.getElementById('mealPlanId').value = '';
+                document.getElementById('mealPlanModalTitle').textContent = 'Add Meal Plan';
+                document.getElementById('mealPlanStatus').value = 'Published';
+                document.getElementById('mealPlanDate').value = new Date().toISOString().slice(0, 10);
+            }
+        };
+
+        window.closeMealPlanModal = function() {
+            document.getElementById('mealPlanModal').classList.remove('active');
+        };
+
+        window.editMealPlan = function(planId) {
+            const plan = mealPlansData.find(item => item.id === planId);
+            if (!plan) {
+                return;
+            }
+            openMealPlanModal(true);
+            document.getElementById('mealPlanModalTitle').textContent = 'Edit Meal Plan';
+            document.getElementById('mealPlanId').value = plan.id;
+            document.getElementById('mealPlanDate').value = plan.serviceDate || '';
+            document.getElementById('mealPlanStatus').value = plan.status || 'Published';
+            document.getElementById('mealPlanSession').value = plan.sessionId || '';
+            document.getElementById('mealPlanCAF').value = plan.cafId || '';
+            document.getElementById('mealPlanTitle').value = plan.mealName || '';
+            document.getElementById('mealPlanItems').value = normalizeMenuItems(plan.menuItems).join('\n');
+            document.getElementById('mealPlanNote').value = plan.note || '';
+        };
+
+        window.toggleMealPlanStatus = async function(planId, nextStatus) {
+            const actionLabel = nextStatus === 'Published' ? 'publish' : 'hide';
+            const confirmed = await openAlertModal({
+                title: `${nextStatus === 'Published' ? 'Publish' : 'Hide'} Meal Plan`,
+                message: `This will ${actionLabel} the meal plan for students.`,
+                confirmText: nextStatus === 'Published' ? 'Publish' : 'Hide',
+                cancelText: 'Cancel'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                setLoading(true, 'Updating meal plan...');
+                await updateDoc(doc(db, 'mealPlans', planId), {
+                    status: nextStatus,
+                    updatedAt: serverTimestamp()
+                });
+                showToast(`Meal plan ${actionLabel}ed.`, 'success', 'Meal Plan');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not update the meal plan.', 'error', 'Meal Plan');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        window.handleSaveMealPlan = async function(e) {
+            e.preventDefault();
+
+            const planId = document.getElementById('mealPlanId').value;
+            const sessionId = document.getElementById('mealPlanSession').value;
+            const cafId = document.getElementById('mealPlanCAF').value;
+            const selectedSession = mealSessionsData.find(session => session.id === sessionId);
+            const selectedCaf = cachedCafs.find(caf => caf.id === cafId);
+
+            if (!selectedSession) {
+                showToast('Select a valid meal session first.', 'warning', 'Meal Plan');
+                return;
+            }
+
+            const payload = {
+                serviceDate: document.getElementById('mealPlanDate').value,
+                sessionId,
+                sessionName: selectedSession.name || 'Session',
+                startTime: selectedSession.startTime || '',
+                endTime: selectedSession.endTime || '',
+                cafId: cafId || '',
+                cafName: selectedCaf?.name || '',
+                mealName: document.getElementById('mealPlanTitle').value.trim(),
+                menuItems: normalizeMenuItems(document.getElementById('mealPlanItems').value),
+                note: document.getElementById('mealPlanNote').value.trim(),
+                status: document.getElementById('mealPlanStatus').value,
+                updatedAt: serverTimestamp()
+            };
+
+            try {
+                setLoading(true, planId ? 'Updating meal plan...' : 'Publishing meal plan...');
+                if (planId) {
+                    await updateDoc(doc(db, 'mealPlans', planId), payload);
+                } else {
+                    payload.createdAt = serverTimestamp();
+                    await addDoc(collection(db, 'mealPlans'), payload);
+                }
+                closeMealPlanModal();
+                showToast('Meal plan saved.', 'success', 'Meal Plan');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not save the meal plan.', 'error', 'Meal Plan');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         window.handleAddTerminal = async function(e) {
             e.preventDefault();
 
@@ -2480,10 +2805,13 @@
             }
             JsBarcode("#adminBarcode", matricNumber, {
                 format: "CODE128",
-                lineColor: "#111827",
+                lineColor: "#0f172a",
+                background: "#ffffff",
                 width: 2,
-                height: 70,
-                displayValue: false
+                height: 84,
+                displayValue: true,
+                fontSize: 16,
+                margin: 10
             });
             document.getElementById('barcodeLabel').textContent = `Matric: ${matricNumber}`;
             document.getElementById('barcodeModal').classList.add('active');

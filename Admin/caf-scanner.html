@@ -239,8 +239,8 @@
                 </div>
                 <form id="scanForm">
                     <div class="form-group">
-                        <label for="matricInput">Scan Matric / Barcode</label>
-                        <input class="scan-input" type="text" id="matricInput" placeholder="Scan barcode..." required>
+                        <label for="matricInput">Scan Matric / Barcode / RFID</label>
+                        <input class="scan-input" type="text" id="matricInput" placeholder="Scan barcode or RFID..." required>
                     </div>
                     <button class="btn" type="submit">Log Meal</button>
                 </form>
@@ -312,6 +312,30 @@
             );
         }
 
+        async function findStudentByScanValue(scanValue) {
+            const matricKey = encodeURIComponent(scanValue);
+            const matricSnap = await getDoc(doc(db, 'matricIndex', matricKey));
+            if (matricSnap.exists()) {
+                const studentId = matricSnap.data().uid;
+                const studentSnap = await getDoc(doc(db, 'students', studentId));
+                if (studentSnap.exists()) {
+                    return { studentId, student: studentSnap.data() };
+                }
+            }
+
+            const rfidQuery = query(collection(db, 'students'), where('rfidCardId', '==', scanValue));
+            const rfidSnapshot = await getDocs(rfidQuery);
+            if (rfidSnapshot.empty) {
+                return null;
+            }
+
+            const studentDoc = rfidSnapshot.docs[0];
+            return {
+                studentId: studentDoc.id,
+                student: studentDoc.data()
+            };
+        }
+
         async function syncQueue() {
             const queue = getQueue();
             if (queue.length === 0 || !navigator.onLine) {
@@ -356,6 +380,9 @@
             sessionSelect.innerHTML = '<option value="">Select Session</option>';
             sessionsSnapshot.forEach(docSnap => {
                 const session = docSnap.data();
+                if ((session.status || 'Active') === 'Inactive') {
+                    return;
+                }
                 const option = document.createElement('option');
                 option.value = docSnap.id;
                 option.textContent = `${session.name || 'Session'} (${session.startTime || '--'} - ${session.endTime || '--'})`;
@@ -420,31 +447,26 @@
         scanForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const matricNumber = matricInput.value.trim();
+            const scanValue = matricInput.value.trim();
             const cafId = cafSelect.value;
             const sessionId = sessionSelect.value;
             const terminalId = terminalSelect.value || null;
+            const sessionOption = sessionSelect.options[sessionSelect.selectedIndex];
+            const sessionLabel = sessionOption?.textContent || 'Meal Session';
+            const sessionName = sessionLabel.split(' (')[0];
 
-            if (!matricNumber || !cafId || !sessionId) {
+            if (!scanValue || !cafId || !sessionId) {
                 showStatus('Please fill all required fields.', 'error');
                 return;
             }
 
-            const matricKey = encodeURIComponent(matricNumber);
-            const matricSnap = await getDoc(doc(db, 'matricIndex', matricKey));
-            if (!matricSnap.exists()) {
-                showStatus('Student not found. Check the matric number.', 'error');
+            const match = await findStudentByScanValue(scanValue);
+            if (!match) {
+                showStatus('Student not found. Check the matric number or RFID card.', 'error');
                 return;
             }
 
-            const studentId = matricSnap.data().uid;
-            const studentSnap = await getDoc(doc(db, 'students', studentId));
-            if (!studentSnap.exists()) {
-                showStatus('Student record missing.', 'error');
-                return;
-            }
-
-            const student = studentSnap.data();
+            const { studentId, student } = match;
             const todayKey = new Date().toISOString().slice(0, 10);
 
             const duplicateQuery = query(
@@ -465,6 +487,7 @@
                 fullName: student.fullName,
                 cafId,
                 mealSessionId: sessionId,
+                mealSessionName: sessionName,
                 terminalId,
                 dateKey: todayKey,
                 timestamp: serverTimestamp()
@@ -473,8 +496,9 @@
             const attendance = {
                 cafId,
                 mealSessionId: sessionId,
+                mealSessionName: sessionName,
                 terminalId,
-                mealType: 'Standard',
+                mealType: sessionName,
                 dateKey: todayKey,
                 timestamp: serverTimestamp()
             };
