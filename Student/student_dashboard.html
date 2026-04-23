@@ -419,6 +419,10 @@
             gap: 0.7rem;
         }
 
+        .meal-plan-action {
+            margin-top: 0.35rem;
+        }
+
         .meal-plan-card.is-today {
             border-color: rgba(56, 189, 248, 0.5);
             box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
@@ -461,6 +465,26 @@
         .meal-plan-meta strong,
         .meal-plan-note strong {
             color: #f8fafc;
+        }
+
+        .meal-plan-modal-summary {
+            color: #cbd5f5;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .meal-plan-modal-list {
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .meal-plan-modal-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 14px;
+            padding: 1rem;
+            display: grid;
+            gap: 0.55rem;
         }
 
         .attendance-section {
@@ -1386,6 +1410,18 @@
         </div>
     </div>
 
+    <div class="modal" id="mealPlanDayModal">
+        <div class="modal-content" style="position: relative; max-width: 640px;">
+            <button class="modal-close" onclick="closeModal('mealPlanDayModal')">&times;</button>
+            <div class="modal-title" id="mealPlanDayModalTitle">Meal Plan</div>
+            <div class="meal-plan-modal-summary" id="mealPlanDayModalSummary">Loading meal details...</div>
+            <div class="meal-plan-modal-list" id="mealPlanDayModalList"></div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeModal('mealPlanDayModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toastContainer"></div>
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -1447,6 +1483,9 @@
         const updatesList = document.getElementById('studentUpdatesList');
         const mealPlanList = document.getElementById('mealPlanList');
         const mealPlanSummary = document.getElementById('mealPlanSummary');
+        const mealPlanDayModalTitle = document.getElementById('mealPlanDayModalTitle');
+        const mealPlanDayModalSummary = document.getElementById('mealPlanDayModalSummary');
+        const mealPlanDayModalList = document.getElementById('mealPlanDayModalList');
         let alertResolver = null;
 
         function showToast(message, type = 'info', title = 'Update') {
@@ -1654,6 +1693,16 @@
                 : parsedDate.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
         }
 
+        function formatServiceDateLong(serviceDate) {
+            if (!serviceDate) {
+                return 'Date not set';
+            }
+            const parsedDate = new Date(`${serviceDate}T00:00:00`);
+            return Number.isNaN(parsedDate.getTime())
+                ? serviceDate
+                : parsedDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
         function normalizeMenuItems(menuItems) {
             if (Array.isArray(menuItems)) {
                 return menuItems.filter(Boolean);
@@ -1699,7 +1748,7 @@
             }
 
             const nextPlan = upcomingPlans[0];
-            mealPlanSummary.textContent = `Next service: ${formatServiceDate(nextPlan.serviceDate)} for ${nextPlan.sessionName || 'Meal Session'}.`;
+            mealPlanSummary.textContent = `Next service: ${formatServiceDate(nextPlan.serviceDate)} for ${nextPlan.sessionName || 'Meal Session'}. Tap a day to view everything that will be served.`;
 
             mealPlanList.innerHTML = upcomingPlans.map(plan => {
                 const isToday = plan.serviceDate === todayKey;
@@ -1722,10 +1771,55 @@
                         <div class="meal-plan-meta"><strong>Time:</strong> ${serviceTime}</div>
                         <div class="meal-plan-meta"><strong>Menu:</strong> ${menuLine}</div>
                         <div class="meal-plan-note"><strong>Note:</strong> ${plan.note || 'No extra notes for this service.'}</div>
+                        <button type="button" class="quick-action secondary meal-plan-action" onclick="openMealPlanDay('${plan.serviceDate}')">View day menu</button>
                     </article>
                 `;
             }).join('');
         }
+
+        window.openMealPlanDay = function(serviceDate) {
+            if (!serviceDate || !mealPlanDayModalTitle || !mealPlanDayModalSummary || !mealPlanDayModalList) {
+                return;
+            }
+
+            const dayPlans = [...mealPlansData]
+                .filter(plan => String(plan.status || 'Published').toLowerCase() === 'published' && plan.serviceDate === serviceDate)
+                .sort((a, b) => String(a.startTime || '').localeCompare(String(b.startTime || '')));
+
+            if (!dayPlans.length) {
+                mealPlanDayModalTitle.textContent = 'Meal Plan';
+                mealPlanDayModalSummary.textContent = 'No published meal plan was found for this date.';
+                mealPlanDayModalList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🍽️</div>
+                        <div>No menu details are available for this day yet.</div>
+                    </div>
+                `;
+                openModal('mealPlanDayModal');
+                return;
+            }
+
+            mealPlanDayModalTitle.textContent = `Meal Plan for ${formatServiceDateLong(serviceDate)}`;
+            mealPlanDayModalSummary.textContent = `${dayPlans.length} serving window${dayPlans.length === 1 ? '' : 's'} scheduled for this day.`;
+            mealPlanDayModalList.innerHTML = dayPlans.map(plan => {
+                const menuItems = normalizeMenuItems(plan.menuItems);
+                const serviceTime = plan.startTime && plan.endTime
+                    ? `${plan.startTime} - ${plan.endTime}`
+                    : plan.startTime || plan.endTime || 'Time to be announced';
+                const menuLine = menuItems.length ? menuItems.join(', ') : 'Menu details will be announced.';
+                return `
+                    <div class="meal-plan-modal-item">
+                        <div class="meal-plan-session">${plan.sessionName || 'Meal Session'}</div>
+                        <div class="meal-plan-title">${plan.mealName || plan.sessionName || 'Meal Service'}</div>
+                        <div class="meal-plan-meta"><strong>Time:</strong> ${serviceTime}</div>
+                        <div class="meal-plan-meta"><strong>CAF:</strong> ${plan.cafName || 'All CAFs'}</div>
+                        <div class="meal-plan-meta"><strong>Menu:</strong> ${menuLine}</div>
+                        <div class="meal-plan-note"><strong>Note:</strong> ${plan.note || 'No extra notes for this service.'}</div>
+                    </div>
+                `;
+            }).join('');
+            openModal('mealPlanDayModal');
+        };
 
         function calculateStreaks(attendanceRecords) {
             const days = new Set();
