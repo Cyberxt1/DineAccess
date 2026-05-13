@@ -1,0 +1,35 @@
+.btn,
+button,
+.quick-action,
+.logout-btn,
+.nav-back,
+.header-chip,
+.leaderboard-item,
+.back-link a {
+    transform-origin: center;
+    will-change: transform;
+}
+
+.is-rolling {
+    animation: button-roll 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes button-roll {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+
+    35% {
+        transform: translateY(-4px) rotate(12deg) scale(1.03);
+    }
+
+    100% {
+        transform: translateY(0) rotate(360deg) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .is-rolling {
+        animation: none !important;
+    }
+}

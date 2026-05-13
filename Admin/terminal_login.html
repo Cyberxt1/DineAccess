@@ -1,10 +1,9 @@
-<!-- New: Admin login with username/password authentication -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - University CAF System</title>
+    <title>Terminal Login - University CAF System</title>
     <link rel="stylesheet" href="../button-roll.css">
     <style>
         * {
@@ -30,7 +29,7 @@
         }
 
         .container {
-            max-width: 520px;
+            max-width: 560px;
             width: 100%;
             background: rgba(15, 23, 42, 0.75);
             border: 1px solid rgba(148, 163, 184, 0.25);
@@ -61,7 +60,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .logo {
@@ -93,13 +92,34 @@
             line-height: 1.6;
         }
 
+        .note {
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #dbeafe;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 18px;
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
         label {
-            display: block;
-            margin-bottom: 8px;
             font-weight: 500;
             color: #e2e8f0;
             font-size: 14px;
@@ -124,21 +144,20 @@
         }
 
         .btn-group {
-            display: flex;
-            flex-direction: column;
+            display: grid;
             gap: 12px;
-            margin-top: 32px;
+            margin-top: 28px;
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 14px 24px;
             font-size: 16px;
             font-weight: 600;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 48px;
+            min-height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -173,11 +192,15 @@
 
         @media (max-width: 640px) {
             .container {
-                padding: 20px;
+                padding: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
             }
 
             h1 {
-                font-size: 24px;
+                font-size: 26px;
             }
         }
     </style>
@@ -185,30 +208,48 @@
 <body>
     <div class="container">
         <div class="back-link">
-            <a href="../index.html">← Back to Home</a>
+            <a href="../index.html">&larr; Back to Home</a>
         </div>
 
         <header>
-            <div class="logo">Admin Access</div>
-            <h1>Admin Login</h1>
-            <p class="description">Enter your credentials to access the admin dashboard</p>
+            <div class="logo">Terminal Access</div>
+            <h1>Terminal Login</h1>
+            <p class="description">Authenticate a scanner terminal before service begins.</p>
         </header>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" placeholder="admin@example.com" required>
-            </div>
+        <div class="note">
+            Use an authorized admin account together with the assigned terminal credentials. This keeps scanner access separate from the admin dashboard flow.
+        </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter password" required>
+        <form id="terminalLoginForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="email">Admin Email</label>
+                    <input type="email" id="email" placeholder="admin@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Admin Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="terminalId">Terminal ID</label>
+                        <input type="text" id="terminalId" placeholder="e.g. CAF-TERM-01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="accessKey">Terminal Access Key</label>
+                        <input type="password" id="accessKey" placeholder="Enter terminal key" required>
+                    </div>
+                </div>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
 
             <div class="btn-group">
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary">Open Scanner</button>
             </div>
         </form>
     </div>
@@ -216,30 +257,59 @@
     <script type="module">
         import { auth, db } from "../firebase.js";
         import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        const form = document.getElementById('terminalLoginForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
+            const terminalId = document.getElementById('terminalId').value.trim();
+            const accessKey = document.getElementById('accessKey').value.trim();
+
+            errorMessage.classList.remove('show');
+            errorMessage.textContent = '';
 
             try {
                 const credential = await signInWithEmailAndPassword(auth, email, password);
-                const adminRef = doc(db, 'admins', credential.user.uid);
-                const adminSnap = await getDoc(adminRef);
+                const adminSnap = await getDoc(doc(db, 'admins', credential.user.uid));
 
                 if (!adminSnap.exists()) {
                     await signOut(auth);
                     throw new Error('Access denied. This account is not an admin.');
                 }
 
-                window.location.href = 'admin-inner-landing.html';
+                const terminalQuery = query(
+                    collection(db, 'terminals'),
+                    where('terminalId', '==', terminalId),
+                    where('accessKey', '==', accessKey)
+                );
+                const terminalSnapshot = await getDocs(terminalQuery);
+
+                if (terminalSnapshot.empty) {
+                    throw new Error('Terminal credentials are invalid.');
+                }
+
+                const terminalDoc = terminalSnapshot.docs[0];
+                const terminal = terminalDoc.data();
+
+                sessionStorage.setItem('cafTerminalSession', JSON.stringify({
+                    terminalDocId: terminalDoc.id,
+                    terminalId: terminal.terminalId || terminalId,
+                    cafId: terminal.cafId || '',
+                    location: terminal.location || '',
+                    adminEmail: credential.user.email || email
+                }));
+
+                window.location.href = 'caf-scanner.html';
             } catch (error) {
-                errorMessage.textContent = error.message || 'Invalid email or password';
+                errorMessage.textContent = error.message || 'Unable to open scanner';
                 errorMessage.classList.add('show');
                 document.getElementById('password').value = '';
+                document.getElementById('accessKey').value = '';
             }
         });
     </script>

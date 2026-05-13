@@ -21,7 +21,8 @@
         }
 
         .container {
-            max-width: 640px;
+            max-width: 540px;
+            max-height: 500px;
             width: 100%;
             text-align: center;
             background: rgba(15, 23, 42, 0.75);
@@ -94,6 +95,8 @@
             justify-content: center;
             width: 100%;
             letter-spacing: 0.5px;
+            transform-origin: center;
+            will-change: transform;
         }
 
         .btn:hover {
@@ -108,6 +111,24 @@
         .btn:focus {
             outline: 2px solid #4299e1;
             outline-offset: 2px;
+        }
+
+        .btn.is-rolling {
+            animation: button-roll 450ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes button-roll {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+
+            35% {
+                transform: translateY(-4px) rotate(12deg) scale(1.03);
+            }
+
+            100% {
+                transform: translateY(0) rotate(360deg) scale(1);
+            }
         }
 
         footer {
@@ -153,5 +174,9 @@
 
             .btn:hover {
                 transform: none;
+            }
+
+            .btn.is-rolling {
+                animation: none;
             }
         }

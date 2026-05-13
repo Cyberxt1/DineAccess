@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal - University CAF System</title>
+    <link rel="stylesheet" href="../button-roll.css">
     <style>
         * {
             margin: 0;
@@ -154,7 +155,7 @@
         <header>
             <div class="logo">Admin Portal</div>
             <h1>Welcome Admin</h1>
-            <p class="welcome-text">Choose your destination</p>
+            <p class="welcome-text">Choose your admin destination</p>
         </header>
 
         <div class="admin-info">
@@ -164,9 +165,6 @@
         <div class="buttons-group">
             <a href="admin-dashboard.html" class="btn">
                 Admin Dashboard
-            </a>
-            <a href="caf-scanner.html" class="btn">
-                CAF Scanner
             </a>
             <button class="btn btn-logout" onclick="handleLogout()">
                 Logout
@@ -202,5 +200,6 @@
             window.location.href = '../index.html';
         };
     </script>
+    <script src="../button-roll.js"></script>
 </body>
 </html>

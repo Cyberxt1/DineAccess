@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAF Scanner - University CAF System</title>
+    <link rel="stylesheet" href="../button-roll.css">
     <style>
         * {
             margin: 0;
@@ -124,6 +125,12 @@
             background: #1d4ed8;
         }
 
+        .btn:disabled,
+        select:disabled {
+            opacity: 0.72;
+            cursor: not-allowed;
+        }
+
         .status {
             margin-top: 16px;
             font-size: 14px;
@@ -187,6 +194,17 @@
             padding: 6px 12px;
         }
 
+        .terminal-lock {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            color: #dbeafe;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         @media (max-width: 768px) {
             .scanner-grid {
                 grid-template-columns: 1fr;
@@ -196,7 +214,7 @@
 </head>
 <body>
     <div class="scanner-card">
-        <a class="back-link" href="admin-inner-landing.html">← Back to Admin</a>
+        <a class="back-link" href="terminal_login.html">&larr; Back to Terminal Login</a>
 
         <div class="scanner-header">
             <div>
@@ -222,13 +240,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="terminalSelect">Terminal (Optional)</label>
+                        <label for="terminalSelect">Terminal</label>
                         <select id="terminalSelect">
                             <option value="">Select Terminal</option>
                         </select>
                     </div>
                     <button class="btn" type="submit">Start Scanning</button>
                 </form>
+                <div class="terminal-lock" id="terminalLockNote">Terminal session not loaded yet.</div>
             </div>
 
             <div class="panel scan-screen" id="scanScreen">
@@ -275,7 +294,15 @@
         const activeSession = document.getElementById('activeSession');
         const activeTerminal = document.getElementById('activeTerminal');
         const networkStatus = document.getElementById('networkStatus');
+        const terminalLockNote = document.getElementById('terminalLockNote');
         const offlineQueueKey = 'caf_offline_queue';
+        const terminalSession = (() => {
+            try {
+                return JSON.parse(sessionStorage.getItem('cafTerminalSession') || 'null');
+            } catch {
+                return null;
+            }
+        })();
 
         function showStatus(message, type) {
             statusBox.textContent = message;
@@ -370,6 +397,9 @@
             cafSelect.innerHTML = '<option value="">Select CAF</option>';
             cafsSnapshot.forEach(docSnap => {
                 const caf = docSnap.data();
+                if (terminalSession?.cafId && docSnap.id !== terminalSession.cafId) {
+                    return;
+                }
                 const option = document.createElement('option');
                 option.value = docSnap.id;
                 option.textContent = caf.name || 'CAF';
@@ -393,28 +423,51 @@
             terminalSelect.innerHTML = '<option value="">Select Terminal</option>';
             terminalsSnapshot.forEach(docSnap => {
                 const terminal = docSnap.data();
+                if (terminalSession?.terminalDocId && docSnap.id !== terminalSession.terminalDocId) {
+                    return;
+                }
                 const option = document.createElement('option');
                 option.value = docSnap.id;
                 option.textContent = terminal.terminalId || 'Terminal';
                 terminalSelect.appendChild(option);
             });
+
+            if (terminalSession?.cafId) {
+                cafSelect.value = terminalSession.cafId;
+                cafSelect.disabled = true;
+            }
+
+            if (terminalSession?.terminalDocId) {
+                terminalSelect.value = terminalSession.terminalDocId;
+                terminalSelect.disabled = true;
+            }
+
+            const terminalLabel = terminalSession?.terminalId || 'Unknown terminal';
+            const terminalLocation = terminalSession?.location ? ` at ${terminalSession.location}` : '';
+            terminalLockNote.textContent = `Locked to ${terminalLabel}${terminalLocation}. Use Terminal Login to switch terminals.`;
         }
 
         onAuthStateChanged(auth, async (user) => {
+            if (!terminalSession?.terminalDocId) {
+                window.location.href = 'terminal_login.html';
+                return;
+            }
+
             if (!user) {
-                window.location.href = 'admin_login.html';
+                window.location.href = 'terminal_login.html';
                 return;
             }
 
             const adminSnap = await getDoc(doc(db, 'admins', user.uid));
             if (!adminSnap.exists()) {
                 await signOut(auth);
-                window.location.href = 'admin_login.html';
+                sessionStorage.removeItem('cafTerminalSession');
+                window.location.href = 'terminal_login.html';
                 return;
             }
 
-            loadOptions();
-            syncQueue();
+            await loadOptions();
+            await syncQueue();
             setTimeout(() => matricInput.focus(), 100);
         });
 
@@ -535,5 +588,6 @@
 
         updateNetworkStatus();
     </script>
+    <script src="../button-roll.js"></script>
 </body>
 </html>

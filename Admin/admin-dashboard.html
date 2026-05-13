@@ -6,6 +6,7 @@
     <title>Admin Dashboard - University CAF System</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="../button-roll.css">
     <style>
         :root {
             --color-primary: #38bdf8;
@@ -337,6 +338,11 @@
         .toolbar input {
             flex: 1;
             min-width: 220px;
+        }
+
+        .toolbar select {
+            min-width: 170px;
+            flex: 0 0 180px;
         }
 
         .section-header {
@@ -971,6 +977,12 @@
 
                 <div class="toolbar">
                     <input type="text" id="studentSearch" placeholder="Search by matric, name, department, or level">
+                    <select id="studentDepartmentFilter">
+                        <option value="">All Departments</option>
+                    </select>
+                    <select id="studentLevelFilter">
+                        <option value="">All Levels</option>
+                    </select>
                     <button class="btn" onclick="exportStudents()">Export CSV</button>
                 </div>
 
@@ -1073,6 +1085,13 @@
                     <button class="btn" onclick="openTerminalModal()">Add New Terminal</button>
                 </div>
 
+                <div class="toolbar">
+                    <input type="text" id="terminalSearch" placeholder="Search by terminal ID or location">
+                    <select id="terminalCafFilter">
+                        <option value="">All CAFs</option>
+                    </select>
+                </div>
+
                 <div class="table-container">
                     <table>
                         <thead>
@@ -1172,6 +1191,16 @@
             <div id="meal-logs" class="page">
                 <div class="page-title">Meal Logs</div>
                 <div class="page-subtitle">View all meal transactions</div>
+
+                <div class="toolbar">
+                    <input type="text" id="mealLogSearch" placeholder="Search by matric number or student name">
+                    <select id="mealLogCafFilter">
+                        <option value="">All CAFs</option>
+                    </select>
+                    <select id="mealLogSessionFilter">
+                        <option value="">All Sessions</option>
+                    </select>
+                </div>
 
                 <div class="table-container">
                     <table>
@@ -1547,6 +1576,13 @@
         let feedbackData = [];
         let updatesData = [];
         let studentSearchTerm = '';
+        let studentDepartmentFilter = '';
+        let studentLevelFilter = '';
+        let terminalSearchTerm = '';
+        let terminalCafFilter = '';
+        let mealLogSearchTerm = '';
+        let mealLogCafFilter = '';
+        let mealLogSessionFilter = '';
         let unsubscribers = [];
         let weeklyMealsChart = null;
         let cafShareChart = null;
@@ -1657,7 +1693,7 @@
 
             document.getElementById('adminName').textContent = adminSnap.data()?.name || user.email || 'System Admin';
             startRealtimeListeners();
-            wireStudentSearch();
+            wireDashboardFilters();
             wireUpdateForm();
         });
 
@@ -1737,10 +1773,17 @@
             const term = studentSearchTerm.toLowerCase();
             const filtered = studentsData.filter(student => {
                 const hay = `${student.matricNumber || ''} ${student.fullName || ''} ${student.department || ''} ${student.level || ''}`.toLowerCase();
-                return hay.includes(term);
+                const matchesSearch = hay.includes(term);
+                const matchesDepartment = !studentDepartmentFilter || (student.department || '') === studentDepartmentFilter;
+                const matchesLevel = !studentLevelFilter || String(student.level || '') === studentLevelFilter;
+                return matchesSearch && matchesDepartment && matchesLevel;
             });
 
             if (filtered.length === 0) {
+                if (studentsData.length > 0) {
+                    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">Filter</div><div class="empty-state-title">No students match these filters</div><p>Try a different search, department, or level.</p></div></td></tr>`;
+                    return;
+                }
                 tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-title">No students yet</div><p>Students will appear here once they register</p></div></td></tr>`;
                 return;
             }
@@ -1775,11 +1818,22 @@
         function renderTerminalsTable() {
             const cafMap = new Map(cachedCafs.map(caf => [caf.id, caf.name]));
             const tbody = document.getElementById('terminalsTable');
-            if (terminalsData.length === 0) {
+            const term = terminalSearchTerm.toLowerCase();
+            const filtered = terminalsData.filter(terminal => {
+                const hay = `${terminal.terminalId || ''} ${terminal.location || ''}`.toLowerCase();
+                const matchesSearch = hay.includes(term);
+                const matchesCaf = !terminalCafFilter || (terminal.cafId || '') === terminalCafFilter;
+                return matchesSearch && matchesCaf;
+            });
+            if (filtered.length === 0 && terminalsData.length > 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">Filter</div><div class="empty-state-title">No terminals match these filters</div><p>Try a different terminal search or CAF.</p></div></td></tr>`;
+                return;
+            }
+            if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">💻</div><div class="empty-state-title">No terminals configured</div><p>Add a new terminal to get started</p></div></td></tr>`;
                 return;
             }
-            tbody.innerHTML = terminalsData.map(terminal => `
+            tbody.innerHTML = filtered.map(terminal => `
                 <tr>
                     <td>${terminal.terminalId || '-'}</td>
                     <td>${cafMap.get(terminal.cafId) || '-'}</td>
@@ -1799,7 +1853,22 @@
                 return;
             }
 
-            const sorted = [...mealLogsData].sort((a, b) => {
+            const term = mealLogSearchTerm.toLowerCase();
+            const filtered = mealLogsData.filter(log => {
+                const student = studentsMap.get(log.studentId) || {};
+                const hay = `${student.matricNumber || log.matricNumber || ''} ${student.fullName || log.fullName || ''}`.toLowerCase();
+                const matchesSearch = hay.includes(term);
+                const matchesCaf = !mealLogCafFilter || (log.cafId || '') === mealLogCafFilter;
+                const matchesSession = !mealLogSessionFilter || (log.mealSessionId || '') === mealLogSessionFilter;
+                return matchesSearch && matchesCaf && matchesSession;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">Filter</div><div class="empty-state-title">No meal logs match these filters</div><p>Try a different student, CAF, or session filter.</p></div></td></tr>`;
+                return;
+            }
+
+            const sorted = [...filtered].sort((a, b) => {
                 const aTime = parseTimestamp(a.timestamp) || new Date(0);
                 const bTime = parseTimestamp(b.timestamp) || new Date(0);
                 return bTime - aTime;
@@ -2490,6 +2559,7 @@
 
             unsubscribers.push(onSnapshot(collection(db, 'students'), (snapshot) => {
                 studentsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                refreshDashboardFilters();
                 renderStudentsTable();
                 renderFeedbackTable();
                 updateDashboard();
@@ -2502,6 +2572,7 @@
 
             unsubscribers.push(onSnapshot(collection(db, 'cafs'), (snapshot) => {
                 cachedCafs = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                refreshDashboardFilters();
                 renderCafsTable();
                 renderTerminalsTable();
                 renderMealLogsTable();
@@ -2519,6 +2590,7 @@
 
             unsubscribers.push(onSnapshot(collection(db, 'terminals'), (snapshot) => {
                 terminalsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                refreshDashboardFilters();
                 renderTerminalsTable();
                 updateDashboard();
                 markLoaded('terminals');
@@ -2530,6 +2602,7 @@
 
             unsubscribers.push(onSnapshot(collection(db, 'mealLogs'), (snapshot) => {
                 mealLogsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                refreshDashboardFilters();
                 renderMealLogsTable();
                 renderAnalytics();
                 updateDashboard();
@@ -2552,6 +2625,7 @@
 
             unsubscribers.push(onSnapshot(collection(db, 'mealSessions'), (snapshot) => {
                 mealSessionsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                refreshDashboardFilters();
                 renderMealSessionsTable();
                 populateMealPlanFormOptions();
                 renderWeeklyMealPlanGrid();
@@ -2610,6 +2684,136 @@
                     studentSearchTerm = value;
                     renderStudentsTable();
                 }, 200);
+            });
+        }
+
+        function updateSelectOptions(selectId, values, defaultLabel) {
+            const select = document.getElementById(selectId);
+            if (!select) {
+                return;
+            }
+
+            const currentValue = select.value;
+            select.innerHTML = `<option value="">${defaultLabel}</option>`;
+            values.forEach(value => {
+                if (!value && value !== 0) {
+                    return;
+                }
+                const option = document.createElement('option');
+                option.value = String(value);
+                option.textContent = String(value);
+                select.appendChild(option);
+            });
+
+            if (currentValue && values.map(value => String(value)).includes(currentValue)) {
+                select.value = currentValue;
+            }
+        }
+
+        function refreshDashboardFilters() {
+            const departments = [...new Set(studentsData.map(student => student.department).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            const levels = [...new Set(studentsData.map(student => student.level).filter(level => level !== undefined && level !== null))].sort((a, b) => Number(a) - Number(b));
+            const cafs = cachedCafs
+                .filter(caf => caf.id)
+                .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            const sessions = mealSessionsData
+                .filter(session => session.id && (session.status || 'Active') !== 'Inactive')
+                .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            updateSelectOptions('studentDepartmentFilter', departments, 'All Departments');
+            updateSelectOptions('studentLevelFilter', levels, 'All Levels');
+
+            const terminalCafFilterSelect = document.getElementById('terminalCafFilter');
+            const mealLogCafFilterSelect = document.getElementById('mealLogCafFilter');
+            const mealLogSessionFilterSelect = document.getElementById('mealLogSessionFilter');
+
+            if (terminalCafFilterSelect) {
+                const currentValue = terminalCafFilterSelect.value;
+                terminalCafFilterSelect.innerHTML = '<option value="">All CAFs</option>';
+                cafs.forEach(caf => {
+                    const option = document.createElement('option');
+                    option.value = caf.id;
+                    option.textContent = caf.name || 'CAF';
+                    terminalCafFilterSelect.appendChild(option);
+                });
+                if (currentValue && cafs.some(caf => caf.id === currentValue)) {
+                    terminalCafFilterSelect.value = currentValue;
+                }
+            }
+
+            if (mealLogCafFilterSelect) {
+                const currentValue = mealLogCafFilterSelect.value;
+                mealLogCafFilterSelect.innerHTML = '<option value="">All CAFs</option>';
+                cafs.forEach(caf => {
+                    const option = document.createElement('option');
+                    option.value = caf.id;
+                    option.textContent = caf.name || 'CAF';
+                    mealLogCafFilterSelect.appendChild(option);
+                });
+                if (currentValue && cafs.some(caf => caf.id === currentValue)) {
+                    mealLogCafFilterSelect.value = currentValue;
+                }
+            }
+
+            if (mealLogSessionFilterSelect) {
+                const currentValue = mealLogSessionFilterSelect.value;
+                mealLogSessionFilterSelect.innerHTML = '<option value="">All Sessions</option>';
+                sessions.forEach(session => {
+                    const option = document.createElement('option');
+                    option.value = session.id;
+                    option.textContent = session.name || 'Session';
+                    mealLogSessionFilterSelect.appendChild(option);
+                });
+                if (currentValue && sessions.some(session => session.id === currentValue)) {
+                    mealLogSessionFilterSelect.value = currentValue;
+                }
+            }
+        }
+
+        function wireDashboardFilters() {
+            wireStudentSearch();
+
+            const studentDepartment = document.getElementById('studentDepartmentFilter');
+            const studentLevel = document.getElementById('studentLevelFilter');
+            const terminalSearch = document.getElementById('terminalSearch');
+            const terminalCaf = document.getElementById('terminalCafFilter');
+            const mealLogSearch = document.getElementById('mealLogSearch');
+            const mealLogCaf = document.getElementById('mealLogCafFilter');
+            const mealLogSession = document.getElementById('mealLogSessionFilter');
+
+            studentDepartment?.addEventListener('change', (event) => {
+                studentDepartmentFilter = event.target.value || '';
+                renderStudentsTable();
+            });
+
+            studentLevel?.addEventListener('change', (event) => {
+                studentLevelFilter = event.target.value || '';
+                renderStudentsTable();
+            });
+
+            terminalSearch?.addEventListener('input', (event) => {
+                terminalSearchTerm = event.target.value || '';
+                renderTerminalsTable();
+            });
+
+            terminalCaf?.addEventListener('change', (event) => {
+                terminalCafFilter = event.target.value || '';
+                renderTerminalsTable();
+            });
+
+            mealLogSearch?.addEventListener('input', (event) => {
+                mealLogSearchTerm = event.target.value || '';
+                renderMealLogsTable();
+            });
+
+            mealLogCaf?.addEventListener('change', (event) => {
+                mealLogCafFilter = event.target.value || '';
+                renderMealLogsTable();
+            });
+
+            mealLogSession?.addEventListener('change', (event) => {
+                mealLogSessionFilter = event.target.value || '';
+                renderMealLogsTable();
             });
         }
 
@@ -3100,6 +3304,7 @@
             window.location.href = '../index.html';
         };
     </script>
+    <script src="../button-roll.js"></script>
 </body>
 </html>
 
