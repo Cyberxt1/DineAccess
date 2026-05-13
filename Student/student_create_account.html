@@ -178,6 +178,10 @@
             margin-top: 0.3rem;
         }
 
+        .select-note {
+            min-height: 1.1rem;
+        }
+
         .success-message {
             display: none;
             background-color: rgba(34, 197, 94, 0.2);
@@ -327,7 +331,7 @@
                             name="matricNumber"
                             placeholder="e.g., 22/0410"
                             pattern="\d{2}/\d{4}"
-                            inputmode="numeric"
+                            <!-- inputmode="numeric" -->
                             minlength="7"
                             maxlength="7"
                             
@@ -348,17 +352,28 @@
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="department">Faculty *</label>
-                        <select id="department" name="department" required>
+                        <label for="faculty">Faculty *</label>
+                        <select id="faculty" name="faculty" required>
                             <option value="">Select Faculty</option>
-                            <option value="engineering">FOE</option>
-                            <option value="sciences">FOS</option>
-                            <option value="business">FBSS</option>
-                            <option value="humanities">FOA</option>
-                            <option value="medicine">FBMS</option>
-                            <option value="law">FOL</option>
+                            <option value="FOE">FOE</option>
+                            <option value="FOS">FOS</option>
+                            <option value="FBSS">FBSS</option>
+                            <option value="FOA">FOA</option>
+                            <option value="FBMS">FBMS</option>
+                            <option value="FOL">FOL</option>
                         </select>
+                        <span class="help-text">Choose your faculty first.</span>
                     </div>
+                    <div class="form-group">
+                        <label for="course">Course *</label>
+                        <select id="course" name="course" required disabled>
+                            <option value="">Select Course</option>
+                        </select>
+                        <span class="help-text select-note" id="courseHelp">Select a faculty to load the available courses.</span>
+                    </div>
+                </div>
+
+                <div class="form-grid">
                     <div class="form-group">
                         <label for="level">Current Level *</label>
                         <select id="level" name="level" required>
@@ -418,13 +433,119 @@
         const form = document.getElementById('registrationForm');
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
+        const facultySelect = document.getElementById('faculty');
+        const courseSelect = document.getElementById('course');
+        const courseHelp = document.getElementById('courseHelp');
+
+        const COURSES_BY_FACULTY = {
+            FOE: [
+                'Agricultural Engineering',
+                'Chemical Engineering',
+                'Civil Engineering',
+                'Computer Engineering',
+                'Electrical and Electronics Engineering',
+                'Mechanical Engineering',
+                'Mechatronics Engineering',
+                'Metallurgical and Materials Engineering',
+                'Petroleum Engineering',
+                'Systems Engineering'
+            ],
+            FOS: [
+                'Biochemistry',
+                'Biological Sciences',
+                'Biotechnology',
+                'Botany',
+                'Chemistry',
+                'Computer Science',
+                'Cyber Security',
+                'Data Science',
+                'Environmental Science',
+                'Geology',
+                'Industrial Chemistry',
+                'Industrial Mathematics',
+                'Marine Science',
+                'Mathematics',
+                'Microbiology',
+                'Physics',
+                'Plant Science and Biotechnology',
+                'Pure and Applied Mathematics',
+                'Science Laboratory Technology',
+                'Statistics',
+                'Zoology'
+            ],
+            FBSS: [
+                'Accounting',
+                'Banking and Finance',
+                'Business Administration',
+                'Criminology and Security Studies',
+                'Economics',
+                'Entrepreneurship',
+                'Industrial Relations and Personnel Management',
+                'International Relations',
+                'Mass Communication',
+                'Marketing',
+                'Political Science',
+                'Public Administration',
+                'Sociology'
+            ],
+            FOA: [
+                'English and Literary Studies',
+                'Fine and Applied Arts',
+                'French',
+                'History and International Studies',
+                'Linguistics',
+                'Music',
+                'Performing Arts',
+                'Philosophy',
+                'Religious Studies',
+                'Theatre Arts'
+            ],
+            FBMS: [
+                'Anatomy',
+                'Dentistry',
+                'Medicine and Surgery',
+                'Medical Laboratory Science',
+                'Nursing Science',
+                'Physiology',
+                'Physiotherapy',
+                'Public Health',
+                'Radiography'
+            ],
+            FOL: [
+                'Law'
+            ]
+        };
+
+        function populateCourses() {
+            const faculty = facultySelect.value;
+            const courses = COURSES_BY_FACULTY[faculty] || [];
+
+            courseSelect.innerHTML = '<option value="">Select Course</option>';
+            courseSelect.disabled = courses.length === 0;
+
+            courses.forEach((course) => {
+                const option = document.createElement('option');
+                option.value = course;
+                option.textContent = course;
+                courseSelect.appendChild(option);
+            });
+
+            courseHelp.textContent = courses.length
+                ? `${courses.length} course${courses.length === 1 ? '' : 's'} available for ${faculty}.`
+                : 'Select a faculty to load the available courses.';
+        }
+
+        facultySelect.addEventListener('change', () => {
+            populateCourses();
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const matricNumber = document.getElementById('matricNumber').value.trim();
             const fullName = document.getElementById('fullName').value.trim();
-            const department = document.getElementById('department').value;
+            const faculty = facultySelect.value;
+            const department = courseSelect.value;
             const level = document.getElementById('level').value;
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
@@ -436,7 +557,7 @@
                 return;
             }
 
-            if (!matricNumber || !fullName || !department || !level || !email || !password) {
+            if (!matricNumber || !fullName || !faculty || !department || !level || !email || !password) {
                 showError('Please fill in all required fields');
                 return;
             }
@@ -458,6 +579,7 @@
                 await setDoc(doc(db, 'students', user.uid), {
                     matricNumber,
                     fullName,
+                    faculty,
                     department,
                     level: parseInt(level, 10),
                     email,
@@ -470,6 +592,8 @@
 
                 await setDoc(doc(db, 'users', user.uid), {
                     fullName,
+                    faculty,
+                    department,
                     level: parseInt(level, 10),
                     streakDays: 0,
                     bestStreakDays: 0,

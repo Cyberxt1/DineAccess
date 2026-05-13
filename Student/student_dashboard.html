@@ -1717,32 +1717,97 @@
             return [];
         }
 
+        const WEEKDAY_OPTIONS = [
+            { value: 1, label: 'Monday' },
+            { value: 2, label: 'Tuesday' },
+            { value: 3, label: 'Wednesday' },
+            { value: 4, label: 'Thursday' },
+            { value: 5, label: 'Friday' },
+            { value: 6, label: 'Saturday' },
+            { value: 0, label: 'Sunday' }
+        ];
+
+        function toDateKey(date) {
+            return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        }
+
+        function getMealPlanWeekdayIndex(plan) {
+            if (Number.isInteger(plan?.weekdayIndex)) {
+                return plan.weekdayIndex;
+            }
+
+            if (typeof plan?.weekdayIndex === 'string' && plan.weekdayIndex !== '') {
+                const parsedIndex = Number(plan.weekdayIndex);
+                if (!Number.isNaN(parsedIndex)) {
+                    return parsedIndex;
+                }
+            }
+
+            if (plan?.serviceDate) {
+                const parsedDate = new Date(`${plan.serviceDate}T00:00:00`);
+                if (!Number.isNaN(parsedDate.getTime())) {
+                    return parsedDate.getDay();
+                }
+            }
+
+            return null;
+        }
+
+        function isRecurringMealPlan(plan) {
+            return plan?.recurring === true || (!plan?.serviceDate && getMealPlanWeekdayIndex(plan) !== null);
+        }
+
+        function buildProjectedMealPlans() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const upcoming = [];
+            const recurringPlans = mealPlansData
+                .filter(plan => String(plan.status || 'Published').toLowerCase() === 'published')
+                .filter(isRecurringMealPlan);
+
+            for (let offset = 0; offset < 8; offset += 1) {
+                const currentDate = new Date(today);
+                currentDate.setDate(today.getDate() + offset);
+                const serviceDate = toDateKey(currentDate);
+                const weekdayIndex = currentDate.getDay();
+
+                recurringPlans
+                    .filter(plan => getMealPlanWeekdayIndex(plan) === weekdayIndex)
+                    .forEach(plan => {
+                        upcoming.push({
+                            ...plan,
+                            serviceDate,
+                            weekdayIndex,
+                            weekdayName: WEEKDAY_OPTIONS.find(day => day.value === weekdayIndex)?.label || '',
+                            projectedFromRecurring: true
+                        });
+                    });
+            }
+
+            return upcoming.sort((a, b) => {
+                const dateCompare = String(a.serviceDate || '').localeCompare(String(b.serviceDate || ''));
+                if (dateCompare !== 0) {
+                    return dateCompare;
+                }
+                return String(a.startTime || '').localeCompare(String(b.startTime || ''));
+            });
+        }
+
         function renderMealPlans() {
             if (!mealPlanList || !mealPlanSummary) {
                 return;
             }
 
             const todayKey = new Date().toISOString().slice(0, 10);
-            const upcomingPlans = [...mealPlansData]
-                .filter(plan => {
-                    const status = String(plan.status || 'Published').toLowerCase();
-                    return status === 'published' && plan.serviceDate && plan.serviceDate >= todayKey;
-                })
-                .sort((a, b) => {
-                    const dateCompare = String(a.serviceDate || '').localeCompare(String(b.serviceDate || ''));
-                    if (dateCompare !== 0) {
-                        return dateCompare;
-                    }
-                    return String(a.startTime || '').localeCompare(String(b.startTime || ''));
-                })
+            const upcomingPlans = buildProjectedMealPlans()
                 .slice(0, 8);
 
             if (!upcomingPlans.length) {
-                mealPlanSummary.textContent = 'No meal plan has been published for the upcoming days yet.';
+                mealPlanSummary.textContent = 'No weekly meal plan has been published yet.';
                 mealPlanList.innerHTML = `
                     <div class="empty-state" style="grid-column: 1 / -1;">
                         <div class="empty-state-icon">Menu</div>
-                        <div>Meal plan will appear here once the CAF publishes it.</div>
+                        <div>Meal plan will appear here once the weekly menu is published.</div>
                     </div>
                 `;
                 return;
@@ -1783,8 +1848,8 @@
                 return;
             }
 
-            const dayPlans = [...mealPlansData]
-                .filter(plan => String(plan.status || 'Published').toLowerCase() === 'published' && plan.serviceDate === serviceDate)
+            const dayPlans = buildProjectedMealPlans()
+                .filter(plan => plan.serviceDate === serviceDate)
                 .sort((a, b) => String(a.startTime || '').localeCompare(String(b.startTime || '')));
 
             if (!dayPlans.length) {
@@ -1837,8 +1902,9 @@
             });
 
             const sortedDays = Array.from(days).sort();
-            let bestStreak = 0;
+            let bestRun = 0;
             let currentStreak = 0;
+            let currentRun = 0;
             let streak = 0;
 
             for (let i = 0; i < sortedDays.length; i += 1) {
@@ -1850,8 +1916,8 @@
                     const diff = (curr - prev) / (1000 * 60 * 60 * 24);
                     streak = diff === 1 ? streak + 1 : 1;
                 }
-                if (streak > bestStreak) {
-                    bestStreak = streak;
+                if (streak > bestRun) {
+                    bestRun = streak;
                 }
             }
 
@@ -1863,10 +1929,13 @@
             if (startKey) {
                 let cursor = new Date(startKey);
                 while (days.has(cursor.toISOString().slice(0, 10))) {
-                    currentStreak += 1;
+                    currentRun += 1;
                     cursor = new Date(cursor.getTime() - 24 * 60 * 60 * 1000);
                 }
             }
+
+            currentStreak = Math.max(currentRun - 1, 0);
+            const bestStreak = Math.max(bestRun - 1, 0);
 
             return { currentStreak, bestStreak, totalDays: days.size };
         }
@@ -2064,8 +2133,7 @@
         }
 
         function listenToMealPlans() {
-            const plansQuery = query(collection(db, 'mealPlans'), orderBy('serviceDate'), limit(40));
-            return onSnapshot(plansQuery, (snapshot) => {
+            return onSnapshot(collection(db, 'mealPlans'), (snapshot) => {
                 mealPlansData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
                 renderMealPlans();
                 markLoaded('mealPlans');

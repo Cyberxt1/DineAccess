@@ -254,7 +254,7 @@
 
         function renderRows(rows) {
             if (!rows.length) {
-                leaderboardList.innerHTML = '<div class="empty-state">No leaderboard data yet.</div>';
+                leaderboardList.innerHTML = '<div class="empty-state">No active streak leaders yet. Only streaks of 4 days and above appear here.</div>';
                 return;
             }
             leaderboardList._rows = rows;
@@ -273,7 +273,18 @@
             try {
                 const leaderboardQuery = query(collection(db, 'users'), orderBy('streakDays', 'desc'), limit(50));
                 const snapshot = await getDocs(leaderboardQuery);
-                const rows = snapshot.docs.map(docSnap => docSnap.data());
+                const rows = snapshot.docs
+                    .map(docSnap => docSnap.data())
+                    .filter(row => Number(row.streakDays || 0) >= 4)
+                    .sort((a, b) => {
+                        if (Number(b.streakDays || 0) !== Number(a.streakDays || 0)) {
+                            return Number(b.streakDays || 0) - Number(a.streakDays || 0);
+                        }
+                        if (Number(b.bestStreakDays || 0) !== Number(a.bestStreakDays || 0)) {
+                            return Number(b.bestStreakDays || 0) - Number(a.bestStreakDays || 0);
+                        }
+                        return Number(b.totalMeals || 0) - Number(a.totalMeals || 0);
+                    });
                 renderRows(rows);
             } catch (error) {
                 console.warn('Leaderboard load failed', error);

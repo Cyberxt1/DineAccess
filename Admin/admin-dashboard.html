@@ -249,7 +249,9 @@
             background-color: rgba(15, 23, 42, 0.85);
             border: 1px solid var(--color-border);
             border-radius: 8px;
-            overflow: hidden;
+            overflow: auto;
+            max-height: min(60vh, 720px);
+            scrollbar-width: thin;
         }
 
         table {
@@ -261,6 +263,9 @@
         thead {
             background-color: rgba(30, 41, 59, 0.9);
             border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
         th {
@@ -449,6 +454,9 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            max-height: min(60vh, 720px);
+            overflow-y: auto;
+            padding-right: 4px;
         }
 
         .update-item {
@@ -992,14 +1000,15 @@
                             <tr>
                                 <th>Matric Number</th>
                                 <th>Name</th>
+                                <th>Faculty</th>
                                 <th>Department</th>
                                 <th>Level</th>
-                                <th>Barcode</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTable">
                             <tr>
-                                <td colspan="5">
+                                <td colspan="6">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">📚</div>
                                         <div class="empty-state-title">No students yet</div>
@@ -1059,11 +1068,12 @@
                                 <th>Building</th>
                                 <th>Capacity</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="cafsTable">
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">🍽️</div>
                                         <div class="empty-state-title">No CAFs configured</div>
@@ -1100,11 +1110,12 @@
                                 <th>CAF</th>
                                 <th>Location</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="terminalsTable">
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">💻</div>
                                         <div class="empty-state-title">No terminals configured</div>
@@ -1153,11 +1164,11 @@
                 <div class="section-header">
                     <div>
                         <div class="page-title" style="font-size: 20px; margin-bottom: 4px;">Meal Planner</div>
-                        <div class="section-copy">Publish menus by date and meal session so students can see what will be served.</div>
+                        <div class="section-copy">Set a fixed weekly menu by day and meal session so the same plan repeats every week.</div>
                     </div>
                     <div class="button-row">
-                        <button class="btn btn-secondary" onclick="openWeeklyMealPlanModal()">Set Weekly Plan</button>
-                        <button class="btn" onclick="openMealPlanModal()">Add Meal Plan</button>
+                        <button class="btn btn-secondary" onclick="openWeeklyMealPlanModal()">Set Weekly Menu</button>
+                        <button class="btn" onclick="openMealPlanModal()">Add Weekly Entry</button>
                     </div>
                 </div>
 
@@ -1165,7 +1176,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Date</th>
+                                <th>Day</th>
                                 <th>Session</th>
                                 <th>Meal</th>
                                 <th>Menu</th>
@@ -1178,8 +1189,8 @@
                                 <td colspan="6">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">Menu</div>
-                                        <div class="empty-state-title">No meal plans yet</div>
-                                        <p>Published menus will appear here.</p>
+                                        <div class="empty-state-title">No weekly meal plans yet</div>
+                                        <p>Your repeating menu schedule will appear here.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -1371,9 +1382,10 @@
     <div id="cafModal" class="modal">
         <div class="modal-content" style="background-color: #a7aba9;">
             <button class="modal-close" onclick="closeCAFModal()">×</button>
-            <div class="modal-title">Add New CAF</div>
+            <div class="modal-title" id="cafModalTitle">Add New CAF</div>
 
             <form id="cafForm" onsubmit="handleAddCAF(event)">
+                <input type="hidden" id="cafId">
                 <div class="form-group">
                     <label for="cafName">CAF Name</label>
                     <input type="text" id="cafName" required>
@@ -1387,7 +1399,7 @@
                     <input type="number" id="cafCapacity" required>
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button type="submit" class="btn">Add CAF</button>
+                    <button type="submit" class="btn" id="cafSubmitBtn">Add CAF</button>
                     <button type="button" class="btn btn-secondary" onclick="closeCAFModal()">Cancel</button>
                 </div>
             </form>
@@ -1397,9 +1409,10 @@
     <div id="terminalModal" class="modal">
         <div class="modal-content" style="background-color: #a7aba9;">
             <button class="modal-close" onclick="closeTerminalModal()">×</button>
-            <div class="modal-title">Add New Terminal</div>
+            <div class="modal-title" id="terminalModalTitle">Add New Terminal</div>
 
             <form id="terminalForm" onsubmit="handleAddTerminal(event)">
+                <input type="hidden" id="terminalDocId">
                 <div class="form-group">
                     <label for="terminalId">Terminal ID</label>
                     <input type="text" id="terminalId" required>
@@ -1419,8 +1432,50 @@
                     <input type="text" id="terminalAccessKey" placeholder="Set a key for terminal access">
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button type="submit" class="btn">Add Terminal</button>
+                    <button type="submit" class="btn" id="terminalSubmitBtn">Add Terminal</button>
                     <button type="button" class="btn btn-secondary" onclick="closeTerminalModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="studentModal" class="modal">
+        <div class="modal-content" style="background-color: #a7aba9;">
+            <button class="modal-close" onclick="closeStudentModal()">Ã—</button>
+            <div class="modal-title" id="studentModalTitle">Edit Student</div>
+
+            <form id="studentForm" onsubmit="handleSaveStudent(event)">
+                <input type="hidden" id="studentId">
+                <input type="hidden" id="studentOriginalMatric">
+                <div class="form-group">
+                    <label for="studentMatric">Matric Number</label>
+                    <input type="text" id="studentMatric" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentFullName">Full Name</label>
+                    <input type="text" id="studentFullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentFaculty">Faculty</label>
+                    <input type="text" id="studentFaculty" placeholder="e.g. FOS">
+                </div>
+                <div class="form-group">
+                    <label for="studentDepartment">Department / Course</label>
+                    <input type="text" id="studentDepartment" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentLevel">Level</label>
+                    <select id="studentLevel" required>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="300">300</option>
+                        <option value="400">400</option>
+                        <option value="500">500</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn">Save Student</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeStudentModal()">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1455,14 +1510,14 @@
     <div id="mealPlanModal" class="modal">
         <div class="modal-content" style="background-color: #a7aba9;">
             <button class="modal-close" onclick="closeMealPlanModal()">&times;</button>
-            <div class="modal-title" id="mealPlanModalTitle">Add Meal Plan</div>
+            <div class="modal-title" id="mealPlanModalTitle">Add Weekly Meal Entry</div>
 
             <form id="mealPlanForm" onsubmit="handleSaveMealPlan(event)">
                 <input type="hidden" id="mealPlanId">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="mealPlanDate">Service Date</label>
-                        <input type="date" id="mealPlanDate" required>
+                        <label for="mealPlanDay">Day of Week</label>
+                        <select id="mealPlanDay" required></select>
                     </div>
                     <div class="form-group">
                         <label for="mealPlanStatus">Status</label>
@@ -1504,13 +1559,9 @@
     <div id="weeklyMealPlanModal" class="modal">
         <div class="modal-content" style="background-color: #a7aba9; max-width: 960px;">
             <button class="modal-close" onclick="closeWeeklyMealPlanModal()">&times;</button>
-            <div class="modal-title">Set Weekly Meal Plan</div>
+            <div class="modal-title">Set Weekly Repeating Meal Plan</div>
             <form id="weeklyMealPlanForm" onsubmit="handleSaveWeeklyMealPlan(event)">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="weeklyPlanStartDate">Week Start</label>
-                        <input type="date" id="weeklyPlanStartDate" required onchange="renderWeeklyMealPlanGrid()">
-                    </div>
                     <div class="form-group">
                         <label for="weeklyPlanCAF">CAF</label>
                         <select id="weeklyPlanCAF" onchange="renderWeeklyMealPlanGrid()"></select>
@@ -1529,10 +1580,10 @@
                         <input type="text" id="weeklyPlanSessionsInfo" readonly>
                     </div>
                 </div>
-                <div class="section-copy">Fill only the rows you want to publish. Matching plans for the same day and session will be updated automatically.</div>
+                <div class="section-copy">Fill the meals for Monday to Sunday. Matching day and session entries will be reused every week automatically.</div>
                 <div class="weekly-plan-grid" id="weeklyMealPlanGrid"></div>
                 <div style="display: flex; gap: 12px; margin-top: 16px;">
-                    <button type="submit" class="btn">Save Weekly Plan</button>
+                    <button type="submit" class="btn">Save Weekly Menu</button>
                     <button type="button" class="btn btn-secondary" onclick="closeWeeklyMealPlanModal()">Cancel</button>
                 </div>
             </form>
@@ -1554,12 +1605,14 @@
         import {
             addDoc,
             collection,
+            deleteDoc,
             doc,
             getDoc,
             getDocs,
             onSnapshot,
             orderBy,
             query,
+            setDoc,
             where,
             serverTimestamp,
             updateDoc,
@@ -1772,7 +1825,7 @@
             const tbody = document.getElementById('studentsTable');
             const term = studentSearchTerm.toLowerCase();
             const filtered = studentsData.filter(student => {
-                const hay = `${student.matricNumber || ''} ${student.fullName || ''} ${student.department || ''} ${student.level || ''}`.toLowerCase();
+                const hay = `${student.matricNumber || ''} ${student.fullName || ''} ${student.faculty || ''} ${student.department || ''} ${student.level || ''}`.toLowerCase();
                 const matchesSearch = hay.includes(term);
                 const matchesDepartment = !studentDepartmentFilter || (student.department || '') === studentDepartmentFilter;
                 const matchesLevel = !studentLevelFilter || String(student.level || '') === studentLevelFilter;
@@ -1781,10 +1834,10 @@
 
             if (filtered.length === 0) {
                 if (studentsData.length > 0) {
-                    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">Filter</div><div class="empty-state-title">No students match these filters</div><p>Try a different search, department, or level.</p></div></td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">Filter</div><div class="empty-state-title">No students match these filters</div><p>Try a different search, department, or level.</p></div></td></tr>`;
                     return;
                 }
-                tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-title">No students yet</div><p>Students will appear here once they register</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-title">No students yet</div><p>Students will appear here once they register</p></div></td></tr>`;
                 return;
             }
 
@@ -1792,9 +1845,14 @@
                 <tr>
                     <td>${student.matricNumber || '-'}</td>
                     <td>${student.fullName || '-'}</td>
+                    <td>${student.faculty || '-'}</td>
                     <td>${student.department || '-'}</td>
                     <td>${student.level || '-'}</td>
-                    <td><button class="btn btn-small" onclick="openBarcodeModal('${student.matricNumber || ''}')">Show</button></td>
+                    <td>
+                        <button class="btn btn-small" onclick="editStudent('${student.id}')">Edit</button>
+                        <button class="btn btn-secondary btn-small" onclick="openBarcodeModal('${student.matricNumber || ''}')">Barcode</button>
+                        <button class="btn btn-secondary btn-small" onclick="deleteStudent('${student.id}')">Delete</button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -1811,6 +1869,10 @@
                     <td>${caf.building || '-'}</td>
                     <td>${caf.capacity || '-'}</td>
                     <td><span class="badge badge-success">Active</span></td>
+                    <td>
+                        <button class="btn btn-small" onclick="editCAF('${caf.id}')">Edit</button>
+                        <button class="btn btn-secondary btn-small" onclick="deleteCAF('${caf.id}')">Delete</button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -1826,7 +1888,7 @@
                 return matchesSearch && matchesCaf;
             });
             if (filtered.length === 0 && terminalsData.length > 0) {
-                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">Filter</div><div class="empty-state-title">No terminals match these filters</div><p>Try a different terminal search or CAF.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">Filter</div><div class="empty-state-title">No terminals match these filters</div><p>Try a different terminal search or CAF.</p></div></td></tr>`;
                 return;
             }
             if (filtered.length === 0) {
@@ -1839,6 +1901,10 @@
                     <td>${cafMap.get(terminal.cafId) || '-'}</td>
                     <td>${terminal.location || '-'}</td>
                     <td><span class="badge badge-info">Active</span></td>
+                    <td>
+                        <button class="btn btn-small" onclick="editTerminal('${terminal.id}')">Edit</button>
+                        <button class="btn btn-secondary btn-small" onclick="deleteTerminal('${terminal.id}')">Delete</button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -1980,6 +2046,46 @@
             return [];
         }
 
+        const WEEKDAY_OPTIONS = [
+            { value: 1, label: 'Monday' },
+            { value: 2, label: 'Tuesday' },
+            { value: 3, label: 'Wednesday' },
+            { value: 4, label: 'Thursday' },
+            { value: 5, label: 'Friday' },
+            { value: 6, label: 'Saturday' },
+            { value: 0, label: 'Sunday' }
+        ];
+
+        function getWeekdayLabel(weekdayIndex) {
+            return WEEKDAY_OPTIONS.find(day => day.value === weekdayIndex)?.label || 'Unknown day';
+        }
+
+        function getMealPlanWeekdayIndex(plan) {
+            if (Number.isInteger(plan?.weekdayIndex)) {
+                return plan.weekdayIndex;
+            }
+
+            if (typeof plan?.weekdayIndex === 'string' && plan.weekdayIndex !== '') {
+                const parsedIndex = Number(plan.weekdayIndex);
+                if (!Number.isNaN(parsedIndex)) {
+                    return parsedIndex;
+                }
+            }
+
+            if (plan?.serviceDate) {
+                const parsedDate = new Date(`${plan.serviceDate}T00:00:00`);
+                if (!Number.isNaN(parsedDate.getTime())) {
+                    return parsedDate.getDay();
+                }
+            }
+
+            return null;
+        }
+
+        function isRecurringMealPlan(plan) {
+            return plan?.recurring === true || (!plan?.serviceDate && getMealPlanWeekdayIndex(plan) !== null);
+        }
+
         function getWeeklyPlannerSessions() {
             const activeSessions = mealSessionsData
                 .filter(session => (session.status || 'Active') !== 'Inactive');
@@ -1988,22 +2094,6 @@
                 return name.includes('lunch') || name.includes('dinner');
             });
             return lunchDinnerSessions.length ? lunchDinnerSessions : activeSessions;
-        }
-
-        function getWeekDates(startDate) {
-            if (!startDate) {
-                return [];
-            }
-            const base = new Date(`${startDate}T00:00:00`);
-            if (Number.isNaN(base.getTime())) {
-                return [];
-            }
-
-            return Array.from({ length: 7 }, (_, index) => {
-                const current = new Date(base);
-                current.setDate(base.getDate() + index);
-                return current.toISOString().slice(0, 10);
-            });
         }
 
         function populateWeeklyMealPlanCAFOptions() {
@@ -2024,7 +2114,6 @@
         function renderWeeklyMealPlanGrid() {
             const grid = document.getElementById('weeklyMealPlanGrid');
             const sessionsInfo = document.getElementById('weeklyPlanSessionsInfo');
-            const weekStart = document.getElementById('weeklyPlanStartDate')?.value;
             const selectedCafId = document.getElementById('weeklyPlanCAF')?.value || '';
             if (!grid || !sessionsInfo) {
                 return;
@@ -2033,24 +2122,24 @@
             const sessions = getWeeklyPlannerSessions();
             sessionsInfo.value = sessions.map(session => session.name || 'Session').join(', ') || 'No active sessions';
 
-            if (!weekStart || !sessions.length) {
-                grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">Menu</div><div class="empty-state-title">No weekly rows available</div><p>${sessions.length ? 'Select a week start date to continue.' : 'Create active Lunch and Dinner sessions first.'}</p></div>`;
+            if (!sessions.length) {
+                grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">Menu</div><div class="empty-state-title">No weekly rows available</div><p>Create active Lunch and Dinner sessions first.</p></div>`;
                 return;
             }
 
-            const weekDates = getWeekDates(weekStart);
-            grid.innerHTML = weekDates.map(serviceDate => {
+            grid.innerHTML = WEEKDAY_OPTIONS.map(day => {
                 return sessions.map(session => {
                     const existingPlan = mealPlansData.find(plan =>
-                        plan.serviceDate === serviceDate &&
+                        isRecurringMealPlan(plan) &&
+                        getMealPlanWeekdayIndex(plan) === day.value &&
                         plan.sessionId === session.id &&
                         (plan.cafId || '') === selectedCafId
                     );
                     return `
                         <div class="weekly-plan-row">
-                            <div class="weekly-plan-label">${formatServiceDate(serviceDate)} - ${session.name || 'Session'}</div>
+                            <div class="weekly-plan-label">${day.label} - ${session.name || 'Session'}</div>
                             <div class="weekly-plan-meta">${session.startTime || '--'} - ${session.endTime || '--'}</div>
-                            <input type="hidden" data-field="service-date" value="${serviceDate}">
+                            <input type="hidden" data-field="weekday-index" value="${day.value}">
                             <input type="hidden" data-field="session-id" value="${session.id}">
                             <input type="hidden" data-field="plan-id" value="${existingPlan?.id || ''}">
                             <div class="form-group" style="margin-bottom: 0;">
@@ -2074,11 +2163,14 @@
         window.renderWeeklyMealPlanGrid = renderWeeklyMealPlanGrid;
 
         function populateMealPlanFormOptions() {
+            const daySelect = document.getElementById('mealPlanDay');
             const sessionSelect = document.getElementById('mealPlanSession');
             const cafSelect = document.getElementById('mealPlanCAF');
-            if (!sessionSelect || !cafSelect) {
+            if (!daySelect || !sessionSelect || !cafSelect) {
                 return;
             }
+
+            daySelect.innerHTML = WEEKDAY_OPTIONS.map(day => `<option value="${day.value}">${day.label}</option>`).join('');
 
             const activeSessions = mealSessionsData
                 .filter(session => (session.status || 'Active') !== 'Inactive')
@@ -2110,14 +2202,20 @@
             }
 
             if (mealPlansData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">Menu</div><div class="empty-state-title">No meal plans yet</div><p>Published menus will appear here.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">Menu</div><div class="empty-state-title">No weekly meal plans yet</div><p>Your repeating menu schedule will appear here.</p></div></td></tr>`;
                 return;
             }
 
-            const sorted = [...mealPlansData].sort((a, b) => {
-                const dateCompare = String(a.serviceDate || '').localeCompare(String(b.serviceDate || ''));
-                if (dateCompare !== 0) {
-                    return dateCompare;
+            const recurringPlans = mealPlansData.filter(isRecurringMealPlan);
+            if (!recurringPlans.length) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">Menu</div><div class="empty-state-title">No weekly meal plans yet</div><p>Create a Monday to Sunday menu to make meals repeat automatically.</p></div></td></tr>`;
+                return;
+            }
+
+            const sorted = [...recurringPlans].sort((a, b) => {
+                const weekdayCompare = getMealPlanWeekdayIndex(a) - getMealPlanWeekdayIndex(b);
+                if (weekdayCompare !== 0) {
+                    return weekdayCompare;
                 }
                 return String(a.startTime || '').localeCompare(String(b.startTime || ''));
             });
@@ -2131,7 +2229,7 @@
                 const toggleStatus = status === 'Published' ? 'Hidden' : 'Published';
                 return `
                     <tr>
-                        <td>${formatServiceDate(plan.serviceDate)}</td>
+                        <td>${getWeekdayLabel(getMealPlanWeekdayIndex(plan))}</td>
                         <td>${plan.sessionName || '-'}</td>
                         <td>${plan.mealName || '-'}</td>
                         <td>${menuText}</td>
@@ -2331,7 +2429,7 @@
             }
 
             const sorted = Array.from(new Set(dateKeys)).sort();
-            let bestStreak = 0;
+            let bestRun = 0;
             let streak = 0;
             for (let i = 0; i < sorted.length; i += 1) {
                 if (i === 0) {
@@ -2342,8 +2440,8 @@
                     const diff = (curr - prev) / (1000 * 60 * 60 * 24);
                     streak = diff === 1 ? streak + 1 : 1;
                 }
-                if (streak > bestStreak) {
-                    bestStreak = streak;
+                if (streak > bestRun) {
+                    bestRun = streak;
                 }
             }
 
@@ -2356,16 +2454,19 @@
                     ? yesterday.toISOString().slice(0, 10)
                     : null;
 
-            let currentStreak = 0;
+            let currentRun = 0;
             if (startKey) {
                 let cursor = new Date(startKey);
                 while (sorted.includes(cursor.toISOString().slice(0, 10))) {
-                    currentStreak += 1;
+                    currentRun += 1;
                     cursor = new Date(cursor.getTime() - 24 * 60 * 60 * 1000);
                 }
             }
 
-            return { currentStreak, bestStreak };
+            return {
+                currentStreak: Math.max(currentRun - 1, 0),
+                bestStreak: Math.max(bestRun - 1, 0)
+            };
         }
 
         function badgeForMeals(totalMeals) {
@@ -2432,7 +2533,22 @@
                     name: student.fullName || 'Unknown',
                     matric: student.matricNumber || '-'
                 };
-            });
+            }).filter(entry => entry.currentStreak >= 4);
+
+            if (!rows.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🏆</div>
+                                <div class="empty-state-title">No active streak leaders yet</div>
+                                <p>Only students with streaks of 4 days and above appear here.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
 
             rows.sort((a, b) => {
                 if (b.bestStreak !== a.bestStreak) return b.bestStreak - a.bestStreak;
@@ -2886,6 +3002,9 @@
         window.openCAFModal = function() {
             document.getElementById('cafModal').classList.add('active');
             document.getElementById('cafForm').reset();
+            document.getElementById('cafId').value = '';
+            document.getElementById('cafModalTitle').textContent = 'Add New CAF';
+            document.getElementById('cafSubmitBtn').textContent = 'Add CAF';
         };
 
         window.closeCAFModal = function() {
@@ -2895,23 +3014,29 @@
         window.handleAddCAF = async function(e) {
             e.preventDefault();
 
+            const cafId = document.getElementById('cafId').value;
             const caf = {
                 name: document.getElementById('cafName').value,
                 building: document.getElementById('cafBuilding').value,
                 capacity: parseInt(document.getElementById('cafCapacity').value, 10),
-                createdAt: serverTimestamp()
+                updatedAt: serverTimestamp()
             };
 
             try {
-                setLoading(true, 'Adding CAF...');
-                await addDoc(collection(db, 'cafs'), caf);
+                setLoading(true, cafId ? 'Updating CAF...' : 'Adding CAF...');
+                if (cafId) {
+                    await updateDoc(doc(db, 'cafs', cafId), caf);
+                } else {
+                    caf.createdAt = serverTimestamp();
+                    await addDoc(collection(db, 'cafs'), caf);
+                }
                 closeCAFModal();
                 updateDashboard();
                 renderCafsTable();
-                showToast('CAF added successfully.', 'success', 'CAF');
+                showToast(cafId ? 'CAF updated successfully.' : 'CAF added successfully.', 'success', 'CAF');
             } catch (error) {
                 console.error(error);
-                showToast('Unable to add CAF right now.', 'error', 'CAF');
+                showToast(cafId ? 'Unable to update this CAF right now.' : 'Unable to add CAF right now.', 'error', 'CAF');
             } finally {
                 setLoading(false);
             }
@@ -2930,10 +3055,242 @@
 
             document.getElementById('terminalModal').classList.add('active');
             document.getElementById('terminalForm').reset();
+            document.getElementById('terminalDocId').value = '';
+            document.getElementById('terminalModalTitle').textContent = 'Add New Terminal';
+            document.getElementById('terminalSubmitBtn').textContent = 'Add Terminal';
         };
 
         window.closeTerminalModal = function() {
             document.getElementById('terminalModal').classList.remove('active');
+        };
+
+        window.openStudentModal = function() {
+            document.getElementById('studentModal').classList.add('active');
+        };
+
+        window.closeStudentModal = function() {
+            document.getElementById('studentModal').classList.remove('active');
+        };
+
+        window.editStudent = function(studentId) {
+            const student = studentsData.find(item => item.id === studentId);
+            if (!student) {
+                return;
+            }
+
+            document.getElementById('studentModalTitle').textContent = 'Edit Student';
+            document.getElementById('studentId').value = student.id;
+            document.getElementById('studentOriginalMatric').value = student.matricNumber || '';
+            document.getElementById('studentMatric').value = student.matricNumber || '';
+            document.getElementById('studentFullName').value = student.fullName || '';
+            document.getElementById('studentFaculty').value = student.faculty || '';
+            document.getElementById('studentDepartment').value = student.department || '';
+            document.getElementById('studentLevel').value = String(student.level || '100');
+            openStudentModal();
+        };
+
+        window.handleSaveStudent = async function(e) {
+            e.preventDefault();
+
+            const studentId = document.getElementById('studentId').value;
+            const originalMatric = document.getElementById('studentOriginalMatric').value.trim();
+            const matricNumber = document.getElementById('studentMatric').value.trim();
+            const fullName = document.getElementById('studentFullName').value.trim();
+            const faculty = document.getElementById('studentFaculty').value.trim();
+            const department = document.getElementById('studentDepartment').value.trim();
+            const level = parseInt(document.getElementById('studentLevel').value, 10);
+
+            if (!studentId || !matricNumber || !fullName || !department || Number.isNaN(level)) {
+                showToast('Fill in the required student fields first.', 'warning', 'Student');
+                return;
+            }
+
+            const updatedStudent = {
+                matricNumber,
+                fullName,
+                faculty,
+                department,
+                level,
+                updatedAt: serverTimestamp()
+            };
+
+            try {
+                setLoading(true, 'Updating student...');
+
+                if (matricNumber !== originalMatric) {
+                    const nextMatricKey = encodeURIComponent(matricNumber);
+                    const nextMatricRef = doc(db, 'matricIndex', nextMatricKey);
+                    const existingMatric = await getDoc(nextMatricRef);
+                    if (existingMatric.exists()) {
+                        throw new Error('That matric number is already assigned to another student.');
+                    }
+
+                    const currentStudent = studentsData.find(item => item.id === studentId) || {};
+                    await setDoc(nextMatricRef, {
+                        uid: studentId,
+                        matricNumber,
+                        email: currentStudent.email || '',
+                        createdAt: serverTimestamp()
+                    });
+
+                    if (originalMatric) {
+                        await deleteDoc(doc(db, 'matricIndex', encodeURIComponent(originalMatric)));
+                    }
+                }
+
+                await updateDoc(doc(db, 'students', studentId), updatedStudent);
+                await setDoc(doc(db, 'users', studentId), {
+                    fullName,
+                    faculty,
+                    department,
+                    level,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+
+                closeStudentModal();
+                showToast('Student updated successfully.', 'success', 'Student');
+            } catch (error) {
+                console.error(error);
+                showToast(error?.message || 'Could not update this student.', 'error', 'Student');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        window.deleteStudent = async function(studentId) {
+            const student = studentsData.find(item => item.id === studentId);
+            if (!student) {
+                return;
+            }
+
+            const confirmed = await openAlertModal({
+                title: 'Delete Student',
+                message: `Delete ${student.fullName || 'this student'} from the dashboard? This removes the student profile, login leaderboard profile, matric index, and any RFID requests.`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                setLoading(true, 'Deleting student...');
+                const relatedRequests = rfidRequestsData.filter(request => request.studentId === studentId);
+                for (const request of relatedRequests) {
+                    await deleteDoc(doc(db, 'rfidRequests', request.id));
+                }
+
+                await deleteDoc(doc(db, 'students', studentId));
+                await deleteDoc(doc(db, 'users', studentId));
+
+                if (student.matricNumber) {
+                    await deleteDoc(doc(db, 'matricIndex', encodeURIComponent(student.matricNumber)));
+                }
+
+                showToast('Student deleted successfully.', 'success', 'Student');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not delete this student.', 'error', 'Student');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        window.editCAF = function(cafId) {
+            const caf = cachedCafs.find(item => item.id === cafId);
+            if (!caf) {
+                return;
+            }
+
+            document.getElementById('cafId').value = caf.id;
+            document.getElementById('cafName').value = caf.name || '';
+            document.getElementById('cafBuilding').value = caf.building || '';
+            document.getElementById('cafCapacity').value = caf.capacity || '';
+            document.getElementById('cafModalTitle').textContent = 'Edit CAF';
+            document.getElementById('cafSubmitBtn').textContent = 'Save CAF';
+            document.getElementById('cafModal').classList.add('active');
+        };
+
+        window.deleteCAF = async function(cafId) {
+            const caf = cachedCafs.find(item => item.id === cafId);
+            if (!caf) {
+                return;
+            }
+
+            const hasTerminals = terminalsData.some(terminal => terminal.cafId === cafId);
+            const hasMealPlans = mealPlansData.some(plan => (plan.cafId || '') === cafId);
+            const hasMealLogs = mealLogsData.some(log => log.cafId === cafId);
+
+            if (hasTerminals || hasMealPlans || hasMealLogs) {
+                showToast('Remove related terminals, meal plans, and meal logs before deleting this CAF.', 'warning', 'CAF');
+                return;
+            }
+
+            const confirmed = await openAlertModal({
+                title: 'Delete CAF',
+                message: `Delete ${caf.name || 'this CAF'} permanently?`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                setLoading(true, 'Deleting CAF...');
+                await deleteDoc(doc(db, 'cafs', cafId));
+                showToast('CAF deleted successfully.', 'success', 'CAF');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not delete this CAF.', 'error', 'CAF');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        window.editTerminal = function(terminalDocId) {
+            const terminal = terminalsData.find(item => item.id === terminalDocId);
+            if (!terminal) {
+                return;
+            }
+
+            openTerminalModal().then(() => {
+                document.getElementById('terminalDocId').value = terminal.id;
+                document.getElementById('terminalId').value = terminal.terminalId || '';
+                document.getElementById('terminalCAF').value = terminal.cafId || '';
+                document.getElementById('terminalLocation').value = terminal.location || '';
+                document.getElementById('terminalAccessKey').value = terminal.accessKey || '';
+                document.getElementById('terminalModalTitle').textContent = 'Edit Terminal';
+                document.getElementById('terminalSubmitBtn').textContent = 'Save Terminal';
+            });
+        };
+
+        window.deleteTerminal = async function(terminalDocId) {
+            const terminal = terminalsData.find(item => item.id === terminalDocId);
+            if (!terminal) {
+                return;
+            }
+
+            const confirmed = await openAlertModal({
+                title: 'Delete Terminal',
+                message: `Delete terminal ${terminal.terminalId || ''}?`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel'
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                setLoading(true, 'Deleting terminal...');
+                await deleteDoc(doc(db, 'terminals', terminalDocId));
+                showToast('Terminal deleted.', 'success', 'Terminal');
+            } catch (error) {
+                console.error(error);
+                showToast('Could not delete this terminal.', 'error', 'Terminal');
+            } finally {
+                setLoading(false);
+            }
         };
 
         window.handleUpdateRfid = async function(requestId, studentId, status) {
@@ -3048,9 +3405,9 @@
             if (!keepData) {
                 document.getElementById('mealPlanForm').reset();
                 document.getElementById('mealPlanId').value = '';
-                document.getElementById('mealPlanModalTitle').textContent = 'Add Meal Plan';
+                document.getElementById('mealPlanModalTitle').textContent = 'Add Weekly Meal Entry';
                 document.getElementById('mealPlanStatus').value = 'Published';
-                document.getElementById('mealPlanDate').value = new Date().toISOString().slice(0, 10);
+                document.getElementById('mealPlanDay').value = '1';
             }
         };
 
@@ -3060,11 +3417,7 @@
 
         window.openWeeklyMealPlanModal = function() {
             populateWeeklyMealPlanCAFOptions();
-            const startInput = document.getElementById('weeklyPlanStartDate');
             const statusInput = document.getElementById('weeklyPlanStatus');
-            if (startInput && !startInput.value) {
-                startInput.value = new Date().toISOString().slice(0, 10);
-            }
             if (statusInput) {
                 statusInput.value = 'Published';
             }
@@ -3082,9 +3435,9 @@
                 return;
             }
             openMealPlanModal(true);
-            document.getElementById('mealPlanModalTitle').textContent = 'Edit Meal Plan';
+            document.getElementById('mealPlanModalTitle').textContent = 'Edit Weekly Meal Entry';
             document.getElementById('mealPlanId').value = plan.id;
-            document.getElementById('mealPlanDate').value = plan.serviceDate || '';
+            document.getElementById('mealPlanDay').value = String(getMealPlanWeekdayIndex(plan) ?? 1);
             document.getElementById('mealPlanStatus').value = plan.status || 'Published';
             document.getElementById('mealPlanSession').value = plan.sessionId || '';
             document.getElementById('mealPlanCAF').value = plan.cafId || '';
@@ -3124,18 +3477,22 @@
             e.preventDefault();
 
             const planId = document.getElementById('mealPlanId').value;
+            const weekdayIndex = Number(document.getElementById('mealPlanDay').value);
             const sessionId = document.getElementById('mealPlanSession').value;
             const cafId = document.getElementById('mealPlanCAF').value;
             const selectedSession = mealSessionsData.find(session => session.id === sessionId);
             const selectedCaf = cachedCafs.find(caf => caf.id === cafId);
 
-            if (!selectedSession) {
-                showToast('Select a valid meal session first.', 'warning', 'Meal Plan');
+            if (!selectedSession || Number.isNaN(weekdayIndex)) {
+                showToast('Select a valid weekday and meal session first.', 'warning', 'Meal Plan');
                 return;
             }
 
             const payload = {
-                serviceDate: document.getElementById('mealPlanDate').value,
+                recurring: true,
+                serviceDate: '',
+                weekdayIndex,
+                weekdayName: getWeekdayLabel(weekdayIndex),
                 sessionId,
                 sessionName: selectedSession.name || 'Session',
                 startTime: selectedSession.startTime || '',
@@ -3150,7 +3507,7 @@
             };
 
             try {
-                setLoading(true, planId ? 'Updating meal plan...' : 'Publishing meal plan...');
+                setLoading(true, planId ? 'Updating weekly meal plan...' : 'Saving weekly meal plan...');
                 if (planId) {
                     await updateDoc(doc(db, 'mealPlans', planId), payload);
                 } else {
@@ -3158,10 +3515,10 @@
                     await addDoc(collection(db, 'mealPlans'), payload);
                 }
                 closeMealPlanModal();
-                showToast('Meal plan saved.', 'success', 'Meal Plan');
+                showToast('Weekly meal entry saved.', 'success', 'Meal Plan');
             } catch (error) {
                 console.error(error);
-                showToast('Could not save the meal plan.', 'error', 'Meal Plan');
+                showToast('Could not save the weekly meal entry.', 'error', 'Meal Plan');
             } finally {
                 setLoading(false);
             }
@@ -3170,34 +3527,31 @@
         window.handleSaveWeeklyMealPlan = async function(e) {
             e.preventDefault();
 
-            const weekStart = document.getElementById('weeklyPlanStartDate').value;
             const cafId = document.getElementById('weeklyPlanCAF').value;
             const status = document.getElementById('weeklyPlanStatus').value;
             const selectedCaf = cachedCafs.find(caf => caf.id === cafId);
             const rows = Array.from(document.querySelectorAll('#weeklyMealPlanGrid .weekly-plan-row'));
 
-            if (!weekStart) {
-                showToast('Select the start date for the week.', 'warning', 'Meal Plan');
-                return;
-            }
-
             const payloads = rows.map(row => {
                 const planId = row.querySelector('[data-field="plan-id"]')?.value || '';
-                const serviceDate = row.querySelector('[data-field="service-date"]')?.value || '';
+                const weekdayIndex = Number(row.querySelector('[data-field="weekday-index"]')?.value);
                 const sessionId = row.querySelector('[data-field="session-id"]')?.value || '';
                 const mealName = row.querySelector('[data-field="meal-name"]')?.value.trim() || '';
                 const menuItems = normalizeMenuItems(row.querySelector('[data-field="menu-items"]')?.value || '');
                 const note = row.querySelector('[data-field="note"]')?.value.trim() || '';
                 const selectedSession = mealSessionsData.find(session => session.id === sessionId);
 
-                if (!selectedSession || (!mealName && menuItems.length === 0 && !note)) {
+                if (!selectedSession || Number.isNaN(weekdayIndex) || (!mealName && menuItems.length === 0 && !note)) {
                     return null;
                 }
 
                 return {
                     planId,
                     payload: {
-                        serviceDate,
+                        recurring: true,
+                        serviceDate: '',
+                        weekdayIndex,
+                        weekdayName: getWeekdayLabel(weekdayIndex),
                         sessionId,
                         sessionName: selectedSession.name || 'Session',
                         startTime: selectedSession.startTime || '',
@@ -3214,12 +3568,12 @@
             }).filter(Boolean);
 
             if (!payloads.length) {
-                showToast('Add at least one meal entry for the week.', 'warning', 'Meal Plan');
+                showToast('Add at least one meal entry for the weekly menu.', 'warning', 'Meal Plan');
                 return;
             }
 
             try {
-                setLoading(true, 'Saving weekly meal plan...');
+                setLoading(true, 'Saving weekly repeating meal plan...');
                 for (const item of payloads) {
                     if (item.planId) {
                         await updateDoc(doc(db, 'mealPlans', item.planId), item.payload);
@@ -3227,7 +3581,8 @@
                     }
 
                     const existingPlan = mealPlansData.find(plan =>
-                        plan.serviceDate === item.payload.serviceDate &&
+                        isRecurringMealPlan(plan) &&
+                        getMealPlanWeekdayIndex(plan) === item.payload.weekdayIndex &&
                         plan.sessionId === item.payload.sessionId &&
                         (plan.cafId || '') === (item.payload.cafId || '')
                     );
@@ -3242,10 +3597,10 @@
                     }
                 }
                 closeWeeklyMealPlanModal();
-                showToast('Weekly meal plan saved.', 'success', 'Meal Plan');
+                showToast('Weekly repeating meal plan saved.', 'success', 'Meal Plan');
             } catch (error) {
                 console.error(error);
-                showToast('Could not save the weekly meal plan.', 'error', 'Meal Plan');
+                showToast('Could not save the weekly repeating meal plan.', 'error', 'Meal Plan');
             } finally {
                 setLoading(false);
             }
@@ -3254,24 +3609,30 @@
         window.handleAddTerminal = async function(e) {
             e.preventDefault();
 
+            const terminalDocId = document.getElementById('terminalDocId').value;
             const terminal = {
                 terminalId: document.getElementById('terminalId').value,
                 cafId: document.getElementById('terminalCAF').value,
                 location: document.getElementById('terminalLocation').value,
                 accessKey: document.getElementById('terminalAccessKey').value || '',
-                createdAt: serverTimestamp()
+                updatedAt: serverTimestamp()
             };
 
             try {
-                setLoading(true, 'Adding terminal...');
-                await addDoc(collection(db, 'terminals'), terminal);
+                setLoading(true, terminalDocId ? 'Updating terminal...' : 'Adding terminal...');
+                if (terminalDocId) {
+                    await updateDoc(doc(db, 'terminals', terminalDocId), terminal);
+                } else {
+                    terminal.createdAt = serverTimestamp();
+                    await addDoc(collection(db, 'terminals'), terminal);
+                }
                 closeTerminalModal();
                 updateDashboard();
                 renderTerminalsTable();
-                showToast('Terminal added.', 'success', 'Terminal');
+                showToast(terminalDocId ? 'Terminal updated.' : 'Terminal added.', 'success', 'Terminal');
             } catch (error) {
                 console.error(error);
-                showToast('Could not add terminal.', 'error', 'Terminal');
+                showToast(terminalDocId ? 'Could not update terminal.' : 'Could not add terminal.', 'error', 'Terminal');
             } finally {
                 setLoading(false);
             }
