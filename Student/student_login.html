@@ -242,10 +242,12 @@
             const identity = document.getElementById('identity').value.trim();
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
+            const submitButton = e.submitter || e.target.querySelector('button[type="submit"]');
 
             if (!identity || !password) {
                 errorMessage.textContent = 'Please enter your email/matric number and password';
                 errorMessage.classList.add('show');
+                window.ButtonRoll?.stop(submitButton);
                 return;
             }
 
@@ -266,6 +268,7 @@
                 errorMessage.textContent = error.message || 'Login failed';
                 errorMessage.classList.add('show');
                 document.getElementById('password').value = '';
+                window.ButtonRoll?.stop(submitButton);
             }
         });
     </script>

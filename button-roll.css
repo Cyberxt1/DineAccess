@@ -6,30 +6,63 @@ button,
 .header-chip,
 .leaderboard-item,
 .back-link a {
-    transform-origin: center;
-    will-change: transform;
+    position: relative;
+    overflow: hidden;
 }
 
-.is-rolling {
-    animation: button-roll 450ms cubic-bezier(0.22, 1, 0.36, 1);
+.btn-roll-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 160ms ease;
 }
 
-@keyframes button-roll {
-    0% {
-        transform: translateY(0) rotate(0deg) scale(1);
+.btn-roll-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    transition: opacity 160ms ease, transform 160ms ease;
+    pointer-events: none;
+}
+
+.is-loading {
+    pointer-events: none;
+}
+
+.is-loading .btn-roll-label {
+    opacity: 0;
+}
+
+.is-loading .btn-roll-spinner {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    animation: button-roll-spinner 700ms linear infinite;
+}
+
+@keyframes button-roll-spinner {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
     }
 
-    35% {
-        transform: translateY(-4px) rotate(12deg) scale(1.03);
-    }
-
-    100% {
-        transform: translateY(0) rotate(360deg) scale(1);
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .is-rolling {
+    .btn-roll-label,
+    .btn-roll-spinner {
+        transition: none;
+    }
+
+    .is-loading .btn-roll-spinner {
         animation: none !important;
     }
 }
